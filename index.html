@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nesne Yönelimli Programlama kavramlarını interaktif bir nöral ağ haritası üzerinde keşfet.">
+  <title>OOP Neural Graph</title>
+
+  <!-- PWA: yüklenebilir uygulama + tema rengi + ikonlar -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060912">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OOP Graph">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Tüm graf (düğümler, bağlar, parçacıklar) tek bir canvas üzerinde çizilir -->
+  <canvas id="graph" role="img" aria-label="OOP kavramlarının nöral ağ haritası"></canvas>
+
+  <!-- ===================== HUD (canvas üstü arayüz) ===================== -->
+  <header class="hud-title">
+    <h1>OOP <span>Neural Knowledge Graph</span></h1>
+    <p>Düğüme tıkla · sürükleyip bırak · tekerlekle yakınlaş</p>
+  </header>
+
+  <!-- Arama: yazdıkça eşleşmeyen düğümler soluklaşır, Enter en iyi sonucu açar -->
+  <div class="search" role="search">
+    <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="M20 20l-3.5-3.5"></path>
+    </svg>
+    <input id="search-input" type="search" placeholder="Kavram ara…" autocomplete="off" spellcheck="false"
+           aria-label="Kavram ara" aria-describedby="search-count">
+    <span class="search-count" id="search-count" aria-live="polite"></span>
+    <kbd aria-hidden="true">/</kbd>
+  </div>
+
+  <!-- Klavye / ekran okuyucu kullanıcıları için kavram listesi (odaklanınca görünür) -->
+  <nav class="a11y-nav" id="a11y-nav" aria-label="Kavram listesi"></nav>
+
+  <!-- Kategori lejantı: JS doldurur -->
+  <nav class="legend" id="legend" aria-label="Kategoriler"></nav>
+
+  <div class="zoom-controls" role="group" aria-label="Yakınlaştırma">
+    <button class="icon-btn" data-zoom="in" aria-label="Yakınlaştır">+</button>
+    <button class="icon-btn" data-zoom="out" aria-label="Uzaklaştır">−</button>
+    <button class="icon-btn" data-zoom="reset" aria-label="Görünümü sıfırla">⟳</button>
+  </div>
+
+  <!-- ===================== BİLGİ PANELİ ===================== -->
+  <aside class="panel" id="panel" aria-labelledby="panel-title" inert>
+    <header class="panel-head">
+      <nav class="crumbs" id="panel-crumbs" aria-label="Konum"></nav>
+      <button class="icon-btn" id="panel-close" aria-label="Paneli kapat">✕</button>
+    </header>
+
+    <div class="panel-body" id="panel-body">
+      <span class="chip" id="panel-chip"></span>
+      <h2 id="panel-title"></h2>
+      <p class="panel-def" id="panel-def"></p>
+
+      <!-- VS Code temalı kod görünümü (önceki projeden gelen highlight mantığı) -->
+      <section class="editor" id="panel-editor" aria-label="Kod örneği">
+        <div class="editor-bar">
+          <span class="traffic" aria-hidden="true"><i></i><i></i><i></i></span>
+          <!-- Sekmeler: data-tab değeri panel.js'te kavramın code / js / quiz alanını seçer -->
+          <div class="editor-tabs" id="panel-tabs" role="tablist" aria-label="Kod ve görev">
+            <button class="editor-tab" type="button" role="tab" data-tab="java" aria-selected="true">
+              <span class="file-icon java">J</span>Java
+            </button>
+            <button class="editor-tab" type="button" role="tab" data-tab="js" aria-selected="false">
+              <span class="file-icon js">JS</span>Vanilla JS
+            </button>
+            <button class="editor-tab" type="button" role="tab" data-tab="quiz" aria-selected="false">
+              <span class="file-icon quiz">◎</span>Görev
+            </button>
+          </div>
+          <button class="copy-btn" id="panel-copy" type="button">Kopyala</button>
+        </div>
+        <pre class="code-view" role="tabpanel"><code id="panel-code"></code></pre>
+
+        <!-- Görev sekmesi: mini sınav -->
+        <div class="quiz" id="panel-quiz" role="tabpanel" hidden>
+          <div class="quiz-head">
+            <span class="quiz-badge">Mini Görev</span>
+            <span class="quiz-progress" id="quiz-progress"></span>
+          </div>
+          <p class="quiz-question" id="quiz-question"></p>
+          <pre class="code-view quiz-code"><code id="quiz-code"></code></pre>
+          <div class="quiz-options" id="quiz-options"></div>
+          <p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
+        </div>
+        <footer class="statusbar">
+          <span id="panel-file">Ornek.java</span>
+          <span id="panel-status">Ln 1</span>
+          <span>UTF-8</span>
+        </footer>
+      </section>
+
+      <section class="related">
+        <h3 id="panel-related-title">İlgili kavramlar</h3>
+        <div class="chips" id="panel-related"></div>
+      </section>
+    </div>
+
+    <footer class="panel-nav">
+      <button class="nav-btn" id="panel-prev" type="button">← Önceki</button>
+      <button class="nav-btn" id="panel-next" type="button">Sonraki →</button>
+    </footer>
+  </aside>
+
+  <!-- Modüller sırayla yüklenir (classic script: file:// ile çift tıklayınca da çalışır) -->
+  <script src="js/data.js" defer></script>
+  <script src="js/highlight.js" defer></script>
+  <script src="js/physics.js" defer></script>
+  <script src="js/renderer.js" defer></script>
+  <script src="js/panel.js" defer></script>
+  <script src="js/search.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>

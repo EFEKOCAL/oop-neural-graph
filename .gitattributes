@@ -1,0 +1,5 @@
+# Satır sonlarını depoda LF olarak normalize et (Windows/macOS/Linux tutarlılığı)
+* text=auto eol=lf
+
+*.png binary
+*.svg text

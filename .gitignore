@@ -1,0 +1,17 @@
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editörler
+.vscode/
+.idea/
+*.swp
+
+# Bağımlılıklar ve loglar
+node_modules/
+*.log
+
+# Gizli bilgiler
+.env
+.env.*
