@@ -41,8 +41,8 @@
       <button type="button" data-mode="syllabus" aria-pressed="false">🎓 Müfredat Modu</button>
     </div>
     <div class="progress-pill" id="progress" role="progressbar" aria-label="Öğrenme ilerlemesi"
-         aria-valuemin="0" aria-valuemax="44" aria-valuenow="0">
-      <span class="progress-text" id="progress-text">0 / 44 öğrenildi · %0</span>
+         aria-valuemin="0" aria-valuemax="179" aria-valuenow="0">
+      <span class="progress-text" id="progress-text">0 / 179 öğrenildi · %0</span>
       <span class="progress-track"><span class="progress-fill" id="progress-fill"></span></span>
     </div>
   </div>
@@ -101,6 +101,10 @@
             <button class="editor-tab" type="button" role="tab" data-tab="quiz" aria-selected="false">
               <span class="file-icon quiz">◎</span>Görev
             </button>
+            <button class="editor-tab" type="button" role="tab" data-tab="practice" aria-selected="false"
+                    title="Akıllı Ev kodlama pratiği (yalnızca uygulamalı kavramlarda)">
+              <span class="file-icon practice">⌨</span>Pratik
+            </button>
           </div>
           <button class="copy-btn" id="panel-copy" type="button">Kopyala</button>
         </div>
@@ -116,6 +120,26 @@
           <pre class="code-view quiz-code"><code id="quiz-code"></code></pre>
           <div class="quiz-options" id="quiz-options"></div>
           <p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
+        </div>
+
+        <!-- Pratik sekmesi: "Akıllı Ev" kod laboratuvarı (doğrulama tarayıcıda) -->
+        <div class="practice" id="panel-practice" role="tabpanel" hidden>
+          <div class="quiz-head">
+            <span class="quiz-badge">🏠 Akıllı Ev Laboratuvarı</span>
+            <span class="practice-step" id="practice-step"></span>
+          </div>
+          <p class="practice-instruction" id="practice-instruction"></p>
+          <div class="practice-editor">
+            <pre class="practice-gutter" id="practice-gutter" aria-hidden="true"></pre>
+            <textarea id="practice-code" wrap="off" spellcheck="false" autocomplete="off"
+                      autocapitalize="off" aria-label="Kod editörü" aria-describedby="practice-instruction"></textarea>
+          </div>
+          <div class="practice-actions">
+            <button class="practice-reset" id="practice-reset" type="button">↺ Taslağa dön</button>
+            <kbd class="practice-hint">Ctrl + Enter</kbd>
+            <button class="practice-run" id="practice-run" type="button">▶ Kodu Test Et</button>
+          </div>
+          <p class="practice-feedback" id="practice-feedback" aria-live="polite"></p>
         </div>
         <footer class="statusbar">
           <span id="panel-file">Ornek.java</span>
@@ -138,6 +162,7 @@
 
   <!-- Modüller sırayla yüklenir (classic script: file:// ile çift tıklayınca da çalışır) -->
   <script src="js/data.js" defer></script>
+  <script src="js/subtopics.js" defer></script>
   <script src="js/highlight.js" defer></script>
   <script src="js/physics.js" defer></script>
   <script src="js/curriculum.js" defer></script>

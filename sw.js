@@ -15,7 +15,7 @@
    kullanıcılar eski önbelleği bırakıp yeni sürümü alır.
    ========================================================================= */
 
-const CACHE_VERSION = "v3"; // v3: DAG topolojisi, ilerleme sistemi, Müfredat Modu
+const CACHE_VERSION = "v5"; // v5: PDF ayrıntıları, uydu alt konular, 9 yeni kavram
 const STATIC_CACHE = `oop-neural-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `oop-neural-runtime-${CACHE_VERSION}`;
 
@@ -26,6 +26,7 @@ const PRECACHE_URLS = [
   "./style.css",
   "./manifest.json",
   "./js/data.js",
+  "./js/subtopics.js",
   "./js/highlight.js",
   "./js/physics.js",
   "./js/curriculum.js",

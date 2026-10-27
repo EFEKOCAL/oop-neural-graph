@@ -18,6 +18,13 @@
    güçlü tutulur, böylece çok bağlı DAG'de yaylar birbirine dolanmaz ve
    sürüklenen düğüm bırakılınca herkes kendi yerine döner.
    Entegrasyon: yarı-örtük Euler, sabit 120 Hz alt adımlar.
+
+   UYDU ALT KONULAR: Ders slaytlarındaki küçük ayrıntılar (ör. "this(...)
+   zincirleme", "JRadioButton + ButtonGroup") ayrı DAG düğümü yerine ana
+   kavramın etrafında dönen uydulardır (kind: "sub"). Yerleşimi ve
+   topolojik sırayı etkilemezler; anchor'ları ev sahibinin (host) anlık
+   konumuna göre hesaplanır. Kapalıyken küçük "aylar" gibi yavaşça döner,
+   ev sahibi seçilince/üzerine gelinince (host.expand → 1) halka olarak açılır.
    ========================================================================= */
 
 const TAU = Math.PI * 2;
@@ -30,6 +37,8 @@ const PHYS = {
   REPULSE: 30,        // itme sertliği
   GAP: 20,            // düğümler arası minimum boşluk (dünya birimi)
   SUBSTEP: 1 / 120,
+  K_ORBIT: 34,        // uydunun yörünge noktasına çekimi
+  SPIN: 0.22,         // kapalı uyduların dönüş hızı (rad/sn)
 };
 
 const LAYOUT = {
@@ -74,11 +83,17 @@ class CategoryGroup {
 }
 
 class GraphNode {
-  constructor({ id, title, label, def, code, js, quiz, traps, dependsOn, color, category, order }) {
-    Object.assign(this, { id, title, label: label || title, def, code, js, quiz, traps, color, order });
-    this.kind = "leaf";
+  constructor({ id, title, label, def, code, js, quiz, traps, practice, dependsOn, color, category, order, host = null }) {
+    Object.assign(this, { id, title, label: label || title, def, code, js, quiz, traps, practice, color, order });
+    this.kind = host ? "sub" : "leaf";
     this.parent = category;          // panel uyumluluğu: gezinti yolu ve kardeşler
+    this.host = host;                // uydu ise bağlı olduğu ana kavram
     this.children = [];
+    this.subs = [];                  // ana kavramın uydu alt konuları
+    this.slot = 0;                   // uydunun yörüngedeki sırası
+    this.expand = 0;                 // uyduların açılma oranı (0 kapalı – 1 açık)
+    this.spin = Math.random() * TAU;
+    this.orbitR = 0;
     this.dependsOnIds = dependsOn || [];
     this.rgb = hexToRgb(color);
     this.drawRgb = [...this.rgb];    // çizim rengi (öğrenilince yeşile karışır)
@@ -111,8 +126,8 @@ class GraphNode {
     this.target = 0;   // Müfredat Modu'nda sıradaki hedef
   }
 
-  get path() { return [this.parent, this].filter(Boolean); }
-  get siblings() { return this.parent ? this.parent.children : [this]; }
+  get path() { return this.host ? [this.parent, this.host, this] : [this.parent, this].filter(Boolean); }
+  get siblings() { return this.host ? this.host.subs : this.parent ? this.parent.children : [this]; }
 }
 
 /**
@@ -130,6 +145,7 @@ function buildGraph(data) {
     categories.push(group);
     for (const concept of cat.concepts) {
       const node = new GraphNode({ ...concept, color: cat.color, category: group, order: order++ });
+      node.subtopicData = concept.subtopics;
       nodes.push(node);
       byId.set(node.id, node);
       group.children.push(node);
@@ -184,12 +200,32 @@ function buildGraph(data) {
   // Kardeşler panelde derinlik sırasıyla gezilsin
   for (const group of categories) group.children.sort((a, b) => a.depth - b.depth || a.order - b.order);
 
-  // 4) Şeritli yerleşim
+  // 4) Şeritli yerleşim (yalnızca ana kavramlar; uydular yerleşimi etkilemez)
   const lanes = layoutLanes(categories, nodes);
+  const concepts = [...nodes];
 
   // Bağ dinlenme uzunlukları = anchor noktaları arası mesafe
   for (const link of links) {
     link.rest = Math.hypot(link.b.ax - link.a.ax, link.b.ay - link.a.ay);
+  }
+
+  // 5) Uydular: ana kavramın etrafındaki küçük alt konular
+  for (const host of concepts) {
+    for (const sub of host.subtopicData ?? []) {
+      if (byId.has(sub.id)) { console.warn(`[DAG] Yinelenen id: "${sub.id}"`); continue; }
+      const node = new GraphNode({ ...sub, color: host.color, category: host.parent, order: order++, host });
+      node.slot = host.subs.length;
+      node.depth = host.depth;
+      node.ancestors = new Set([...host.ancestors, host]);
+      node.radius = 2;
+      node.floatAmp = 0;
+      node.anchorK = PHYS.K_ORBIT;
+      host.subs.push(node);
+      nodes.push(node);
+      byId.set(node.id, node);
+    }
+    // Açık halka yarıçapı alt konu sayısıyla büyür
+    host.orbitR = 48 + Math.min(host.subs.length, 12) * 4;
   }
 
   // Başlangıç: herkes merkeze yakın → yaylar ağı "açar" (açılış animasyonu)
@@ -198,7 +234,7 @@ function buildGraph(data) {
     n.y = n.ay * 0.05 + (Math.random() - 0.5) * 30;
   }
 
-  return { nodes, links, linkByKey, byId, categories, topo, lanes, bounds: lanes.bounds };
+  return { nodes, concepts, links, linkByKey, byId, categories, topo, lanes, bounds: lanes.bounds };
 }
 
 function layoutLanes(categories, nodes) {
@@ -297,13 +333,27 @@ class PhysicsEngine {
   }
 
   #integrate(h, t) {
-    const { nodes, links } = this.graph;
+    const { nodes, concepts, links } = this.graph;
 
-    // 1–2) Anchor yayı + süzülme: hedef nokta yavaşça salınır
+    // 1–2) Anchor yayı + süzülme: hedef nokta yavaşça salınır.
+    //      Uydunun hedefi ise ev sahibinin anlık konumu etrafındaki yörünge noktasıdır
+    //      (ana kavramlar dizide önce geldiği için host bu adımda zaten güncel).
     for (const n of nodes) {
-      const amp = n.floatAmp * this.ampScale;
-      const tx = n.ax + amp * Math.sin(t * n.freq[0] + n.phase[0]);
-      const ty = n.ay + amp * Math.cos(t * n.freq[1] + n.phase[1]);
+      let tx, ty;
+      const host = n.host;
+      if (host) {
+        const count = host.subs.length;
+        const outer = count > 9 && n.slot % 2 ? 1.3 : 1; // kalabalık halkada iki sıra
+        const r = host.radius * host.scale + 6 + host.expand * (host.orbitR * outer - 6);
+        const ang = host.spin + (n.slot / count) * TAU;
+        tx = host.x + Math.cos(ang) * r;
+        ty = host.y + Math.sin(ang) * r;
+      } else {
+        if (n.subs.length) n.spin += PHYS.SPIN * this.ampScale * (1 - n.expand) * h;
+        const amp = n.floatAmp * this.ampScale;
+        tx = n.ax + amp * Math.sin(t * n.freq[0] + n.phase[0]);
+        ty = n.ay + amp * Math.cos(t * n.freq[1] + n.phase[1]);
+      }
       n.fx = n.anchorK * (tx - n.x);
       n.fy = n.anchorK * (ty - n.y);
     }
@@ -321,11 +371,11 @@ class PhysicsEngine {
       b.fy -= f * dy;
     }
 
-    // 4) Yakın düğümler arası itme
-    for (let i = 0; i < nodes.length; i++) {
-      const a = nodes[i];
-      for (let j = i + 1; j < nodes.length; j++) {
-        const b = nodes[j];
+    // 4) Yakın ana kavramlar arası itme (uydular yörüngede kalır, itişmez)
+    for (let i = 0; i < concepts.length; i++) {
+      const a = concepts[i];
+      for (let j = i + 1; j < concepts.length; j++) {
+        const b = concepts[j];
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const minD = a.radius + b.radius + PHYS.GAP;

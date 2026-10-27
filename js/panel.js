@@ -7,12 +7,16 @@
      - Vanilla JS (node.js)    → aynı görünüm
      - Görev      (node.quiz)  → mini sınav; tek ya da çok aşamalı
                                 ("① Derleme → ② Çıktı/Teşhis" tarayıcısı)
+     - Pratik     (node.practice) → "Akıllı Ev" kod laboratuvarı: taslak kod
+                                textarea'da düzenlenir, PracticeValidator ile
+                                tarayıcıda denetlenir; geçince kavram öğrenilir
    Kod satırları kademeli (stagger) belirir; ardından veride "//!" ile
    işaretlenen satırlar .flash ile parlatılır. Seçilen sekme kavramlar
    arasında korunur; o kavramda yoksa ilk uygun sekmeye düşülür.
    Kavramın 'traps' verisi varsa tanımın altında 🚨 Tuzaklar kutusu çıkar.
    Alt çubukta "Bunu Öğrendim" düğmesi ilerlemeyi işaretler; ilgili kavramlar
-   bölümü DAG'e göre "önkoşullar" ve "bunu öğrenince açılanlar" olarak ayrılır.
+   bölümü DAG'e göre "önkoşullar" ve "bunu öğrenince açılanlar" olarak ayrılır;
+   ana kavramın uydu alt konuları ve alt konunun ana kavramı da burada listelenir.
    Gezinti (←/→) main.js'e devredilir: Serbest modda kategori içi,
    Müfredat modunda sıradaki hedefe gider.
    ========================================================================= */
@@ -21,9 +25,82 @@ const EDITOR_TABS = {
   java: { field: "code", ext: "java", fallbackFile: "Ornek.java" },
   js:   { field: "js",   ext: "js",   fallbackFile: "ornek.js" },
   quiz: { field: "quiz" },
+  practice: { field: "practice" },
 };
 const TAB_STORAGE_KEY = "oop-neural:editor-tab";
 const SOLVED_STORAGE_KEY = "oop-neural:solved";
+const DRAFTS_STORAGE_KEY = "oop-neural:practice-drafts";
+const PASSED_STORAGE_KEY = "oop-neural:practice-passed";
+const PRACTICE_INDENT = "    ";
+
+/* ---------------- Pratik doğrulayıcı (sunucusuz, metin tabanlı) ----------------
+   Kod çalıştırılmaz; yorumlar silinir, boşluklar normalize edilir ve
+   validationKeys kurallarının HEPSİ aranır:
+     "metin" → boşluk farkı gözetilmeden geçmeli ("this.name=name;" de olur)
+     /regex/ → tüm boşlukları tek boşluğa indirilmiş kodda eşleşmeli
+   Ayrıca (), {}, [] dengesi denetlenir: "hatalı sözdizimi" uyarısı buradan. */
+const PracticeValidator = {
+  // Yorumları sil; string/char literallerindeki "//" ve "/*" korunur
+  stripComments(src) {
+    let out = "";
+    for (let i = 0; i < src.length;) {
+      const c = src[i], n = src[i + 1];
+      if (c === '"' || c === "'") {
+        let j = i + 1;
+        while (j < src.length && src[j] !== c && src[j] !== "\n") j += src[j] === "\\" ? 2 : 1;
+        out += src.slice(i, j + 1);
+        i = j + 1;
+      } else if (c === "/" && n === "/") {
+        while (i < src.length && src[i] !== "\n") i++;
+      } else if (c === "/" && n === "*") {
+        const end = src.indexOf("*/", i + 2);
+        i = end === -1 ? src.length : end + 2;
+        out += " ";
+      } else {
+        out += c;
+        i++;
+      }
+    }
+    return out;
+  },
+
+  normalize(src) {
+    return this.stripComments(src).replace(/\s+/g, " ").trim();
+  },
+
+  // Noktalama çevresindeki boşlukları at: "this.name = name ;" → "this.name=name;"
+  compact(text) {
+    return text.replace(/\s*([^\p{L}\p{N}_\s])\s*/gu, "$1");
+  },
+
+  // Parantez dengesi (string literalleri atlanarak)
+  isBalanced(code) {
+    const pairs = { ")": "(", "]": "[", "}": "{" };
+    const stack = [];
+    let quote = null;
+    for (let i = 0; i < code.length; i++) {
+      const c = code[i];
+      if (quote) {
+        if (c === "\\") i++;
+        else if (c === quote) quote = null;
+      } else if (c === '"' || c === "'") quote = c;
+      else if ("([{".includes(c)) stack.push(c);
+      else if (c in pairs && stack.pop() !== pairs[c]) return false;
+    }
+    return stack.length === 0;
+  },
+
+  check(source, keys) {
+    const code = this.normalize(source);
+    const compactCode = this.compact(code);
+    const results = keys.map((key) => key instanceof RegExp
+      ? key.test(code)
+      : compactCode.includes(this.compact(this.normalize(key))));
+    const passed = results.filter(Boolean).length;
+    const balanced = this.isBalanced(code);
+    return { ok: balanced && passed === keys.length, passed, total: keys.length, balanced };
+  },
+};
 
 // localStorage gizli modda/kapalıyken hata fırlatabilir → sessizce varsayılana düş
 function readStorage(key, fallback) {
@@ -47,23 +124,28 @@ class InfoPanel {
   #shownTab = "java";   // o an gösterilen sekme (tercih yoksa düşülen)
   #solved;              // çözülen görevlerin id'leri
   #quiz = null;         // aktif görev durumu: { node, stages, index }
+  #drafts;              // pratik taslakları: { kavramId: kod }
+  #passed;              // geçilen pratiklerin id'leri
+  #practiceNode = null;
   #timers = [];
   #onNavigate;
   #onPreview;
   #onClose;
   #onQuizSolved;
   #onToggleLearned;
+  #onPracticePassed;
   #onStep;
   #isLearned;
   #mode = "free";
 
-  constructor(el, { onNavigate, onPreview, onClose, onQuizSolved, onToggleLearned, onStep, isLearned }) {
+  constructor(el, { onNavigate, onPreview, onClose, onQuizSolved, onToggleLearned, onPracticePassed, onStep, isLearned }) {
     this.#el = el;
     this.#onNavigate = onNavigate;
     this.#onPreview = onPreview;
     this.#onClose = onClose;
     this.#onQuizSolved = onQuizSolved;
     this.#onToggleLearned = onToggleLearned;
+    this.#onPracticePassed = onPracticePassed;
     this.#onStep = onStep;
     this.#isLearned = isLearned;
     const $ = (id) => document.getElementById(id);
@@ -78,6 +160,10 @@ class InfoPanel {
       quiz: $("panel-quiz"), quizProgress: $("quiz-progress"), quizQuestion: $("quiz-question"),
       quizCodeView: $("quiz-code").parentElement, quizCode: $("quiz-code"),
       quizOptions: $("quiz-options"), quizFeedback: $("quiz-feedback"),
+      practice: $("panel-practice"), practiceStep: $("practice-step"),
+      practiceInstruction: $("practice-instruction"), practiceCode: $("practice-code"),
+      practiceGutter: $("practice-gutter"), practiceRun: $("practice-run"),
+      practiceReset: $("practice-reset"), practiceFeedback: $("practice-feedback"),
     };
     this.#createDynamicParts();
 
@@ -102,6 +188,9 @@ class InfoPanel {
     const savedTab = readStorage(TAB_STORAGE_KEY, "java");
     if (savedTab in EDITOR_TABS) this.#tab = savedTab;
     this.#solved = new Set(readStorage(SOLVED_STORAGE_KEY, []));
+    this.#drafts = readStorage(DRAFTS_STORAGE_KEY, {});
+    this.#passed = new Set(readStorage(PASSED_STORAGE_KEY, []));
+    this.#bindPractice();
   }
 
   get isOpen() { return this.#el.classList.contains("is-open"); }
@@ -118,7 +207,9 @@ class InfoPanel {
     this.#renderCrumbs(node);
     els.chip.textContent = node.kind === "category"
       ? `Kategori · ${node.children.length} kavram`
-      : `${node.parent.title} · Seviye ${node.depth + 1}`;
+      : node.host
+        ? `${node.host.title} · Alt konu ${node.slot + 1}/${node.host.subs.length}`
+        : `${node.parent.title} · Seviye ${node.depth + 1}${node.subs.length ? ` · ${node.subs.length} alt konu` : ""}`;
     this.syncLearned();
     els.title.textContent = node.title;
     els.def.textContent = node.def;
@@ -126,7 +217,7 @@ class InfoPanel {
     this.#renderEditor(node);
     this.#renderRelated(node);
 
-    const isConcept = node.kind === "leaf";
+    const isConcept = node.kind !== "category";
     els.prev.disabled = !isConcept;
     els.next.disabled = !isConcept && this.#mode !== "syllabus";
 
@@ -163,7 +254,7 @@ class InfoPanel {
   syncLearned() {
     const node = this.#current;
     const btn = this.#els.learn;
-    if (!node || node.kind !== "leaf") {
+    if (!node || node.kind === "category") {
       btn.hidden = true;
       return;
     }
@@ -185,7 +276,8 @@ class InfoPanel {
     writeStorage(TAB_STORAGE_KEY, tab);
     if (this.#current && tab !== this.#shownTab) {
       this.#renderEditor(this.#current);
-      this.#replay(tab === "quiz" ? this.#els.quiz : this.#els.codeView, "is-switching");
+      const view = { quiz: this.#els.quiz, practice: this.#els.practice }[tab] ?? this.#els.codeView;
+      this.#replay(view, "is-switching");
     }
   }
 
@@ -209,12 +301,15 @@ class InfoPanel {
       tab.tabIndex = active ? 0 : -1;
     }
 
-    const isQuiz = this.#shownTab === "quiz";
-    els.codeView.hidden = isQuiz;
-    els.quiz.hidden = !isQuiz;
-    els.copy.hidden = isQuiz;
-    if (isQuiz) this.#renderQuiz(node);
-    else this.#renderCode(node[EDITOR_TABS[this.#shownTab].field], EDITOR_TABS[this.#shownTab]);
+    const tab = this.#shownTab;
+    const isCode = tab === "java" || tab === "js";
+    els.codeView.hidden = !isCode;
+    els.quiz.hidden = tab !== "quiz";
+    els.practice.hidden = tab !== "practice";
+    els.copy.hidden = !isCode;
+    if (tab === "quiz") this.#renderQuiz(node);
+    else if (tab === "practice") this.#renderPractice(node);
+    else this.#renderCode(node[EDITOR_TABS[tab].field], EDITOR_TABS[tab]);
   }
 
   // Kodu satır satır vurgulayıp gösterir; belirme bitince odak satırlarını parlatır
@@ -446,6 +541,122 @@ class InfoPanel {
     this.#els.quizProgress.style.setProperty("--p", `${(solved / total) * 100}%`);
   }
 
+  /* ---------------- Pratik (Akıllı Ev kod laboratuvarı) ---------------- */
+  #bindPractice() {
+    const els = this.#els;
+    const area = els.practiceCode;
+
+    area.addEventListener("input", () => {
+      this.#syncGutter();
+      this.#clearPracticeResult();
+      if (this.#practiceNode) {
+        this.#drafts[this.#practiceNode.id] = area.value;
+        writeStorage(DRAFTS_STORAGE_KEY, this.#drafts);
+      }
+    });
+    area.addEventListener("scroll", () => { els.practiceGutter.scrollTop = area.scrollTop; });
+    for (const type of ["keyup", "click", "focus"]) area.addEventListener(type, () => this.#syncCursor());
+
+    // Editör kısayolları: Tab → girinti, Ctrl+Enter → test, Esc → editörden çık
+    area.addEventListener("keydown", (e) => {
+      if (e.key === "Tab" && !e.shiftKey) {
+        e.preventDefault();
+        area.setRangeText(PRACTICE_INDENT, area.selectionStart, area.selectionEnd, "end");
+        area.dispatchEvent(new Event("input"));
+      } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.#runPractice();
+      } else if (e.key === "Escape") {
+        e.stopPropagation(); // ilk Esc paneli kapatmasın, yalnızca odağı bıraksın
+        area.blur();
+      }
+    });
+
+    els.practiceRun.addEventListener("click", () => this.#runPractice());
+    els.practiceReset.addEventListener("click", () => {
+      const node = this.#practiceNode;
+      if (!node) return;
+      delete this.#drafts[node.id];
+      writeStorage(DRAFTS_STORAGE_KEY, this.#drafts);
+      area.value = node.practice.skeleton;
+      this.#syncGutter();
+      this.#clearPracticeResult();
+      area.focus();
+    });
+  }
+
+  #renderPractice(node) {
+    const els = this.#els;
+    const practice = node.practice;
+    const order = Object.keys(PRACTICES);
+    this.#practiceNode = node;
+    this.#plainCode = "";
+
+    const cls = practice.skeleton.match(/\b(?:class|interface)\s+(\w+)/g)?.pop()?.split(/\s+/)[1];
+    els.file.textContent = cls && cls !== "______" ? `${cls}.java` : "Device.java";
+    els.practiceStep.textContent = `Bölüm ${order.indexOf(node.id) + 1} / ${order.length}`;
+    els.practiceInstruction.textContent = practice.instruction;
+    els.practiceCode.value = this.#drafts[node.id] ?? practice.skeleton;
+    els.practiceCode.scrollTop = 0;
+    this.#syncGutter();
+    this.#clearPracticeResult();
+    els.status.textContent = "Ln 1, Col 1";
+
+    if (this.#passed.has(node.id)) {
+      els.practiceFeedback.className = "practice-feedback is-info";
+      els.practiceFeedback.textContent = "✓ Bu bölümü daha önce tamamladın. Kodunla oynamaya devam edebilirsin.";
+    }
+  }
+
+  #runPractice() {
+    const els = this.#els;
+    const node = this.#practiceNode;
+    if (!node) return;
+    const practice = node.practice;
+    const result = PracticeValidator.check(els.practiceCode.value, practice.validationKeys);
+    const btn = els.practiceRun;
+    btn.classList.remove("is-success", "is-error");
+
+    if (result.ok) {
+      this.#replay(btn, "is-success");
+      els.practiceFeedback.className = "practice-feedback is-success";
+      els.practiceFeedback.textContent = `✓ ${practice.successMessage}`;
+      this.#passed.add(node.id);
+      writeStorage(PASSED_STORAGE_KEY, [...this.#passed]);
+      this.#onPracticePassed(node); // DAG'de "öğrenildi" + kilit açma animasyonları
+      return;
+    }
+
+    this.#replay(btn, "is-error");
+    this.#replay(els.practiceFeedback, "is-error");
+    els.practiceFeedback.className = "practice-feedback is-error";
+    const detail = result.balanced
+      ? `${result.total} kuralın ${result.passed} tanesi sağlandı.`
+      : "Parantez veya süslü parantez dengesi bozuk.";
+    els.practiceFeedback.textContent = `✗ Eksik veya hatalı sözdizimi · ${detail}`;
+  }
+
+  #clearPracticeResult() {
+    const els = this.#els;
+    els.practiceRun.classList.remove("is-success", "is-error");
+    els.practiceFeedback.className = "practice-feedback";
+    els.practiceFeedback.textContent = "";
+  }
+
+  #syncGutter() {
+    const area = this.#els.practiceCode;
+    const count = area.value.split("\n").length;
+    this.#els.practiceGutter.textContent = Array.from({ length: count }, (_, i) => i + 1).join("\n");
+    this.#els.practiceGutter.scrollTop = area.scrollTop;
+  }
+
+  // Durum çubuğunda VS Code gibi imleç konumu
+  #syncCursor() {
+    const area = this.#els.practiceCode;
+    const before = area.value.slice(0, area.selectionStart).split("\n");
+    this.#els.status.textContent = `Ln ${before.length}, Col ${before.at(-1).length + 1}`;
+  }
+
   /* ---------------- Gezinti yolu ve ilgili kavramlar ---------------- */
   #renderCrumbs(node) {
     const crumbs = this.#els.crumbs;
@@ -480,8 +691,17 @@ class InfoPanel {
       els.related.replaceChildren(this.#chipGroup(null, node.children));
       return;
     }
+    if (node.host) {
+      els.relatedTitle.textContent = "Konu haritası";
+      els.related.replaceChildren(
+        this.#chipGroup("Ana konu", [node.host]),
+        this.#chipGroup("Diğer alt konular", node.host.subs.filter((s) => s !== node)),
+      );
+      return;
+    }
     els.relatedTitle.textContent = "Öğrenme yolu";
     const groups = [];
+    if (node.subs.length) groups.push(this.#chipGroup(`Alt konular (${node.subs.length})`, node.subs));
     groups.push(node.deps.length
       ? this.#chipGroup("Önkoşullar", node.deps)
       : this.#chipGroup("Önkoşullar", [], "Başlangıç kavramı: önkoşulu yok 🌱"));

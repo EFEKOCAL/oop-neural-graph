@@ -13,6 +13,9 @@
 
    Odak önceliği (hangi düğümler parlak kalır, gerisi soluklaşır):
      arama > panel/lejant önizlemesi > Müfredat Modu hedefleri > hover/seçim
+
+   Uydu alt konular: seçili / üzerine gelinen / önizlenen kavramın ve
+   aramada alt konusu eşleşen kavramların uyduları halka olarak açılır.
    ========================================================================= */
 
 const MODE_STORAGE_KEY = "oop-neural:mode";
@@ -31,6 +34,7 @@ class App {
   #modeButtons = [];
 
   #hovered = null;
+  #hoverHost = null;  // imleç yörüngesinde gezinirken açık kalan ana kavram
   #selected = null;   // kavram düğümü veya kategori grubu
   #preview = null;    // panel chip'i / lejant üzerine gelinen öğe
   #mode = "free";     // "free" | "syllabus"
@@ -57,6 +61,7 @@ class App {
       onClose: () => this.select(null),
       onQuizSolved: (node, firstTime) => this.#celebrate(node, firstTime),
       onToggleLearned: (node) => this.#toggleLearned(node),
+      onPracticePassed: (node) => this.#completePractice(node),
       onStep: (node, dir) => this.#step(node, dir),
       isLearned: (node) => this.#curriculum.isLearned(node),
     });
@@ -107,8 +112,25 @@ class App {
 
   // Bir kavramın "ilgi alanı": kendisi + tüm önkoşul zinciri + doğrudan açtıkları
   #focusFor(item) {
-    if (item.kind === "category") return new Set(item.children);
-    return new Set([item, ...item.ancestors, ...item.dependents]);
+    if (item.kind === "category") return new Set(item.children.flatMap((n) => [n, ...n.subs]));
+    if (item.host) return new Set([item, item.host, ...item.host.subs, ...item.host.ancestors]);
+    return new Set([item, ...item.ancestors, ...item.dependents, ...item.subs]);
+  }
+
+  // Uyduları açık olacak ana kavramlar
+  #expandedHosts(search) {
+    const hosts = new Set();
+    const add = (n) => {
+      if (!n || n.kind === "category") return;
+      const host = n.host ?? n;
+      if (host.subs.length) hosts.add(host);
+    };
+    add(this.#selected);
+    add(this.#hovered);
+    add(this.#hoverHost);
+    add(this.#preview);
+    if (search) search.matches.forEach((n) => { if (n.host) hosts.add(n.host); });
+    return hosts;
   }
 
   // Hover/seçim/arama/müfredat durumlarını yumuşak geçişlerle düğümlere yansıtır
@@ -135,8 +157,17 @@ class App {
     }
 
     const k = 1 - Math.exp(-10 * dt);
+    const expanded = this.#expandedHosts(search);
+    for (const n of this.#graph.concepts) {
+      if (n.subs.length) n.expand += ((expanded.has(n) ? 1 : 0) - n.expand) * k * 0.8;
+    }
     for (const n of this.#graph.nodes) {
-      const alphaT = !focus || focus.has(n) ? 1 : dimmed;
+      let alphaT = !focus || focus.has(n) ? 1 : dimmed;
+      if (n.host) {
+        // Kapalı uydu: ana kavramın yanında küçük, soluk bir "ay"
+        alphaT *= 0.5 + 0.5 * n.host.expand;
+        n.radius = 2 + 3.6 * n.host.expand;
+      }
       const hoverT = n === this.#hovered || n === this.#preview ? 1 : 0;
       const selT = n === this.#selected ? 1 : 0;
       const matchT = search && search.matches.has(n) ? 1 : 0;
@@ -173,10 +204,10 @@ class App {
       return;
     }
     this.#selected = item;
-    if (item.kind === "leaf") {
+    if (item.kind !== "category") {
       item.scaleV += 7;                  // pop!
       this.#effects.burst(item);         // halka + kıvılcım
-      this.#effects.signal(item);        // önkoşul zinciri boyunca akan sinyal
+      this.#effects.signal(item.host ?? item); // önkoşul zinciri boyunca akan sinyal
     }
     this.#panel.show(item);
     document.body.classList.add("panel-open");
@@ -189,6 +220,9 @@ class App {
     const max = this.#fit * 5;
     if (item.kind === "category") {
       this.#camera.setTarget(this.#center.x, item.lane.cy, Math.min(max, this.#fit * 1.15));
+    } else if (item.host) {
+      // Alt konu: halkanın tamamı görünsün diye ana kavrama odaklan
+      this.#camera.setTarget(item.host.ax, item.host.ay, Math.min(max, Math.max(this.#fit * 2.2, 1.05)));
     } else {
       this.#camera.setTarget(item.ax, item.ay, Math.min(max, Math.max(this.#fit * 1.8, 0.85)));
     }
@@ -201,14 +235,14 @@ class App {
         const target = this.#curriculum.frontier.find((n) => n !== node) ?? this.#curriculum.next;
         if (target) this.select(target);
         else this.#toast("🎉 Müfredattaki tüm kavramları öğrendin!");
-      } else if (node.kind === "leaf") {
-        const prev = this.#curriculum.previousInOrder(node);
+      } else if (node.kind !== "category") {
+        const prev = node.host ?? this.#curriculum.previousInOrder(node);
         if (prev) this.select(prev);
       }
       return;
     }
-    if (node.kind !== "leaf") return;
-    const sibs = node.siblings;
+    if (node.kind === "category") return;
+    const sibs = node.siblings; // alt konuda: aynı ana kavramın diğer uyduları
     const i = sibs.indexOf(node);
     this.select(sibs[(i + dir + sibs.length) % sibs.length]);
   }
@@ -234,6 +268,17 @@ class App {
     } else {
       this.#toast(`✓ ${node.title} öğrenildi · ${done}/${total}`);
     }
+  }
+
+  // Pratik geçilince kavram öğrenilmiş sayılır (kilit açma animasyonları dahil)
+  #completePractice(node) {
+    if (!this.#curriculum.isLearned(node)) {
+      this.#toggleLearned(node);
+      return;
+    }
+    node.scaleV += 6;
+    this.#effects.burst(node, LEARNED_RGB);
+    this.#toast(`✓ ${node.title} pratiği tamamlandı`);
   }
 
   // Görev doğru çözülünce graf üzerinde ödül: ilk çözümde daha büyük patlama
@@ -354,6 +399,7 @@ class App {
       const p = this.#pointer;
       if (!p || p.id !== e.pointerId) {
         this.#hovered = this.#renderer.hitTest(e.clientX, e.clientY);
+        this.#trackHoverHost(e.clientX, e.clientY);
         canvas.style.cursor = this.#hovered ? "pointer" : "grab";
         return;
       }
@@ -390,7 +436,9 @@ class App {
     };
     canvas.addEventListener("pointerup", end);
     canvas.addEventListener("pointercancel", end);
-    canvas.addEventListener("pointerleave", () => { if (!this.#pointer) this.#hovered = null; });
+    canvas.addEventListener("pointerleave", () => {
+      if (!this.#pointer) { this.#hovered = null; this.#hoverHost = null; }
+    });
 
     canvas.addEventListener("wheel", (e) => {
       e.preventDefault();
@@ -419,6 +467,17 @@ class App {
       if (e.key === "ArrowRight") this.#panel.step(1);
       if (e.key === "ArrowLeft") this.#panel.step(-1);
     });
+  }
+
+  // İmleç ana kavramdan uydularına giderken halka kapanmasın:
+  // imleç yörünge alanında kaldıkça ana kavram açık tutulur
+  #trackHoverHost(sx, sy) {
+    const n = this.#hovered;
+    const host = n ? (n.host ?? (n.subs.length ? n : null)) : this.#hoverHost;
+    if (!host) { this.#hoverHost = null; return; }
+    const w = this.#camera.toWorld(sx, sy);
+    const reach = host.orbitR * 1.35 + 24 / this.#camera.scale;
+    this.#hoverHost = Math.hypot(w.x - host.x, w.y - host.y) <= reach ? host : null;
   }
 
   /* ---------------- Arama ---------------- */
@@ -486,7 +545,8 @@ class App {
     for (const cat of this.#graph.categories) {
       const h = document.createElement("h2");
       h.textContent = cat.title;
-      nav.append(h, button(cat, `${cat.title} (genel bakış)`), ...cat.children.map((c) => button(c)));
+      nav.append(h, button(cat, `${cat.title} (genel bakış)`),
+        ...cat.children.flatMap((c) => [button(c), ...c.subs.map((s) => button(s, `↳ ${s.title}`))]));
     }
   }
 }

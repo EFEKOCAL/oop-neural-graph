@@ -5,8 +5,9 @@
    Effects  : önkoşul bağları boyunca akan sinyaller, halkalar, kıvılcımlar.
               Öğrenilmiş düğümlerden çıkan bağlarda sinyal daha sık, hızlı
               ve parlak akar (mikro ödül).
-   Renderer : her karede arka plan → kategori şeritleri → bağlar → sinyaller
-              → düğümler → etiketler → efektler sırasıyla çizer.
+   Renderer : her karede arka plan → kategori şeritleri → bağlar → uydu
+              yörüngeleri → sinyaller → düğümler → etiketler → efektler
+              sırasıyla çizer.
    Parlama (glow) için pahalı shadowBlur yerine "lighter" (additive) karışım
    + geniş/şeffaf ve ince/parlak iki geçiş kullanılır → 60 fps.
    ========================================================================= */
@@ -194,6 +195,7 @@ class GraphRenderer {
 
     this.#drawLanes(px);
     this.#drawLinks(time, px);
+    this.#drawOrbits(px);
     this.#drawPulses(time, px);
     for (const n of this.graph.nodes) this.#drawNode(n, time, px);
     for (const n of this.graph.nodes) this.#drawLabel(n, px);
@@ -284,6 +286,26 @@ class GraphRenderer {
       ctx.lineTo(p.x + Math.cos(ang - 2.5) * s, p.y + Math.sin(ang - 2.5) * s);
       ctx.closePath();
       ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Ana kavram → uydu alt konu: açıkken ince ışınlar + soluk yörünge çemberi
+  #drawOrbits(px) {
+    const ctx = this.ctx;
+    ctx.globalCompositeOperation = "lighter";
+    ctx.lineWidth = 1 * px;
+    for (const host of this.graph.concepts) {
+      if (!host.subs.length || host.expand < 0.02) continue;
+      const e = host.expand;
+      ctx.strokeStyle = rgba(host.drawRgb, 1);
+      ctx.globalAlpha = host.alpha * e * 0.07;
+      ctx.beginPath(); ctx.arc(host.x, host.y, host.orbitR, 0, TAU); ctx.stroke();
+      for (const sub of host.subs) {
+        ctx.globalAlpha = sub.alpha * e * (0.22 + 0.35 * sub.hover + 0.35 * sub.selected);
+        ctx.strokeStyle = rgba(sub.drawRgb, 1);
+        ctx.beginPath(); ctx.moveTo(host.x, host.y); ctx.lineTo(sub.x, sub.y); ctx.stroke();
+      }
     }
     ctx.globalAlpha = 1;
   }
@@ -383,6 +405,7 @@ class GraphRenderer {
   }
 
   #drawLabel(n, px) {
+    if (n.host) return this.#drawSubLabel(n, px);
     const ctx = this.ctx;
     const r = n.radius * n.scale;
     const focused = n.hover > 0.5 || n.selected > 0.5 || n.match > 0.5 || n.target > 0.5;
@@ -399,6 +422,33 @@ class GraphRenderer {
     ctx.strokeText(text, n.x, y);
     ctx.fillStyle = focused ? "#ffffff" : n.learned > 0.5 ? "rgba(187, 247, 208, 0.92)" : "rgba(203, 213, 225, 0.88)";
     ctx.fillText(text, n.x, y);
+  }
+
+  // Uydu etiketi yörüngenin dışına doğru yazılır (sağdakiler sola hizalı, soldakiler sağa)
+  #drawSubLabel(n, px) {
+    const host = n.host;
+    const vis = Math.max(host.expand, n.match, n.selected);
+    if (vis < 0.05) return;
+    const ctx = this.ctx;
+    const dx = n.x - host.x, dy = n.y - host.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const ux = dx / d, uy = dy / d;
+    const r = n.radius * n.scale + 5 * px;
+    const focused = n.hover > 0.5 || n.selected > 0.5 || n.match > 0.5;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = Math.max(0.08, n.alpha) * vis;
+    ctx.font = `${focused ? 600 : 500} ${this.#font(10.5)}px Inter, system-ui, sans-serif`;
+    ctx.textAlign = ux > 0.35 ? "left" : ux < -0.35 ? "right" : "center";
+    ctx.textBaseline = uy > 0.35 ? "top" : uy < -0.35 ? "bottom" : "middle";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(6, 9, 18, 0.9)";
+    ctx.lineWidth = 3.2 * px;
+    const x = n.x + ux * r, y = n.y + uy * r;
+    const text = focused ? n.title : n.label;
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = focused ? "#ffffff" : n.learned > 0.5 ? "rgba(187, 247, 208, 0.9)" : "rgba(203, 213, 225, 0.82)";
+    ctx.fillText(text, x, y);
+    ctx.globalAlpha = 1;
   }
 
   #drawRipples(px) {
@@ -437,7 +487,8 @@ class GraphRenderer {
     let best = null;
     let bestD = Infinity;
     for (const n of this.graph.nodes) {
-      const hitR = Math.max(n.radius * n.scale, 10 * px) + 5 * px;
+      if (n.host && n.host.expand < 0.5) continue; // kapalı uydular tıklanmaz
+      const hitR = Math.max(n.radius * n.scale, (n.host ? 7 : 10) * px) + 5 * px;
       const d = Math.hypot(p.x - n.x, p.y - n.y);
       if (d <= hitR && d < bestD) { best = n; bestD = d; }
     }
