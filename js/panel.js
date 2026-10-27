@@ -11,6 +11,10 @@
    işaretlenen satırlar .flash ile parlatılır. Seçilen sekme kavramlar
    arasında korunur; o kavramda yoksa ilk uygun sekmeye düşülür.
    Kavramın 'traps' verisi varsa tanımın altında 🚨 Tuzaklar kutusu çıkar.
+   Alt çubukta "Bunu Öğrendim" düğmesi ilerlemeyi işaretler; ilgili kavramlar
+   bölümü DAG'e göre "önkoşullar" ve "bunu öğrenince açılanlar" olarak ayrılır.
+   Gezinti (←/→) main.js'e devredilir: Serbest modda kategori içi,
+   Müfredat modunda sıradaki hedefe gider.
    ========================================================================= */
 
 const EDITOR_TABS = {
@@ -48,13 +52,20 @@ class InfoPanel {
   #onPreview;
   #onClose;
   #onQuizSolved;
+  #onToggleLearned;
+  #onStep;
+  #isLearned;
+  #mode = "free";
 
-  constructor(el, { onNavigate, onPreview, onClose, onQuizSolved }) {
+  constructor(el, { onNavigate, onPreview, onClose, onQuizSolved, onToggleLearned, onStep, isLearned }) {
     this.#el = el;
     this.#onNavigate = onNavigate;
     this.#onPreview = onPreview;
     this.#onClose = onClose;
     this.#onQuizSolved = onQuizSolved;
+    this.#onToggleLearned = onToggleLearned;
+    this.#onStep = onStep;
+    this.#isLearned = isLearned;
     const $ = (id) => document.getElementById(id);
     this.#els = {
       body: $("panel-body"), crumbs: $("panel-crumbs"), chip: $("panel-chip"),
@@ -102,23 +113,22 @@ class InfoPanel {
     const els = this.#els;
     const wasOpen = this.isOpen;
     this.#current = node;
-    this.#el.style.setProperty("--c", node.kind === "root" ? "#4fc3f7" : node.color);
+    this.#el.style.setProperty("--c", node.color);
 
     this.#renderCrumbs(node);
-    els.chip.textContent = {
-      root: "Kök kavram",
-      category: `Kategori · ${node.children.length} kavram`,
-      leaf: node.parent?.title,
-    }[node.kind];
+    els.chip.textContent = node.kind === "category"
+      ? `Kategori · ${node.children.length} kavram`
+      : `${node.parent.title} · Seviye ${node.depth + 1}`;
+    this.syncLearned();
     els.title.textContent = node.title;
     els.def.textContent = node.def;
     this.#renderTraps(node);
     this.#renderEditor(node);
     this.#renderRelated(node);
 
-    const hasSiblings = node.kind !== "root";
-    els.prev.disabled = !hasSiblings;
-    els.next.disabled = !hasSiblings;
+    const isConcept = node.kind === "leaf";
+    els.prev.disabled = !isConcept;
+    els.next.disabled = !isConcept && this.#mode !== "syllabus";
 
     // İçerik değişim animasyonu (panel zaten açıksa)
     if (wasOpen) this.#replay(els.body, "is-swapping");
@@ -135,13 +145,37 @@ class InfoPanel {
     this.#onPreview(null);
   }
 
-  // Aynı kategorideki önceki/sonraki kavrama geç (döngüsel)
+  // Önceki/sonraki: hedefi main.js seçer (moda göre kategori içi veya müfredat)
   step(dir) {
+    if (this.#current) this.#onStep(this.#current, dir);
+  }
+
+  // Serbest Dolaşım / Müfredat Modu: gezinti düğmelerinin anlamı değişir
+  setMode(mode) {
+    this.#mode = mode;
+    const syllabus = mode === "syllabus";
+    this.#els.prev.textContent = syllabus ? "← Müfredatta önceki" : "← Önceki";
+    this.#els.next.textContent = syllabus ? "Sıradaki hedef →" : "Sonraki →";
+    if (this.#current) this.syncLearned();
+  }
+
+  // "Bunu Öğrendim" düğmesini ve ilişkili kavram işaretlerini güncel duruma getir
+  syncLearned() {
     const node = this.#current;
-    if (!node || !node.parent) return;
-    const sibs = node.siblings;
-    const i = sibs.indexOf(node);
-    this.#onNavigate(sibs[(i + dir + sibs.length) % sibs.length]);
+    const btn = this.#els.learn;
+    if (!node || node.kind !== "leaf") {
+      btn.hidden = true;
+      return;
+    }
+    const learned = this.#isLearned(node);
+    btn.hidden = false;
+    btn.classList.toggle("is-learned", learned);
+    btn.setAttribute("aria-pressed", String(learned));
+    btn.textContent = learned ? "✓ Öğrenildi" : "Bunu Öğrendim";
+    btn.title = learned ? "İşareti kaldırmak için tıkla" : "Bu kavramı öğrendiğini işaretle";
+    // Müfredat modunda öğrenince "Sıradaki hedef" düğmesi dikkat çeksin
+    this.#els.next.classList.toggle("is-suggested", learned && this.#mode === "syllabus");
+    this.#renderRelated(node);
   }
 
   // Sekme değiştir ve açık kavramı o sekmede yeniden çiz
@@ -251,6 +285,17 @@ class InfoPanel {
     els.quizProgress.parentElement.after(els.quizStepper);
     els.quizFeedback.after(els.quizNext, els.quizConsole);
     els.quizNext.addEventListener("click", () => this.#goToStage(this.#quiz.index + 1));
+
+    // "Bunu Öğrendim": alt çubukta önceki/sonraki arasında
+    els.learn = Object.assign(document.createElement("button"), {
+      type: "button", className: "learn-btn", hidden: true,
+    });
+    els.prev.after(els.learn);
+    els.learn.addEventListener("click", () => {
+      if (!this.#current) return;
+      this.#onToggleLearned(this.#current);
+      this.#replay(els.learn, "is-popping");
+    });
   }
 
   #renderTraps(node) {
@@ -427,37 +472,63 @@ class InfoPanel {
     });
   }
 
+  // DAG'e göre öğrenme yolu: önkoşullar ← [kavram] → bunu öğrenince açılanlar
   #renderRelated(node) {
     const els = this.#els;
-    let list;
-    if (node.kind === "leaf") {
-      list = node.siblings.filter((n) => n !== node);
-      els.relatedTitle.textContent = "Aynı kategorideki kavramlar";
-    } else if (node.kind === "category") {
-      list = node.children;
-      els.relatedTitle.textContent = `Bu kategorideki kavramlar (${list.length})`;
-    } else {
-      list = node.children;
-      els.relatedTitle.textContent = "Kategoriler";
+    if (node.kind === "category") {
+      els.relatedTitle.textContent = `Bu kategorideki kavramlar (${node.children.length})`;
+      els.related.replaceChildren(this.#chipGroup(null, node.children));
+      return;
     }
+    els.relatedTitle.textContent = "Öğrenme yolu";
+    const groups = [];
+    groups.push(node.deps.length
+      ? this.#chipGroup("Önkoşullar", node.deps)
+      : this.#chipGroup("Önkoşullar", [], "Başlangıç kavramı: önkoşulu yok 🌱"));
+    if (node.dependents.length) groups.push(this.#chipGroup("Bunu öğrenince açılanlar", node.dependents));
+    els.related.replaceChildren(...groups);
+  }
 
-    els.related.replaceChildren(...list.map((n) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "chip-btn";
-      btn.textContent = n.title;
-      if (n.quiz) btn.classList.add("has-quiz");
-      if (n.traps) btn.classList.add("has-traps");
-      if (this.#solved.has(n.id)) btn.classList.add("is-solved");
-      btn.style.setProperty("--c", n.color);
-      btn.addEventListener("click", () => this.#onNavigate(n));
-      // Chip'in üzerine gelince graf üzerinde o düğüm önizlenir
-      btn.addEventListener("mouseenter", () => this.#onPreview(n));
-      btn.addEventListener("mouseleave", () => this.#onPreview(null));
-      btn.addEventListener("focus", () => this.#onPreview(n));
-      btn.addEventListener("blur", () => this.#onPreview(null));
-      return btn;
-    }));
+  #chipGroup(label, nodes, emptyText = "") {
+    const group = document.createElement("div");
+    group.className = "rel-group";
+    if (label) {
+      const title = document.createElement("span");
+      title.className = "rel-label";
+      title.textContent = label;
+      group.append(title);
+    }
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    if (!nodes.length && emptyText) {
+      const empty = document.createElement("span");
+      empty.className = "rel-empty";
+      empty.textContent = emptyText;
+      chips.append(empty);
+    }
+    chips.append(...nodes.map((n) => this.#chip(n)));
+    group.append(chips);
+    return group;
+  }
+
+  #chip(n) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip-btn";
+    const learned = this.#isLearned(n);
+    btn.textContent = (learned ? "✓ " : "") + n.title;
+    btn.classList.toggle("is-learned", learned);
+    if (n.quiz) btn.classList.add("has-quiz");
+    if (n.traps) btn.classList.add("has-traps");
+    if (this.#solved.has(n.id)) btn.classList.add("is-solved");
+    btn.style.setProperty("--c", n.color);
+    btn.addEventListener("click", () => this.#onNavigate(n));
+    // Chip'in üzerine gelince graf üzerinde o düğüm önizlenir
+    btn.addEventListener("mouseenter", () => this.#onPreview(n));
+    btn.addEventListener("mouseleave", () => this.#onPreview(null));
+    btn.addEventListener("focus", () => this.#onPreview(n));
+    btn.addEventListener("blur", () => this.#onPreview(null));
+    return btn;
   }
 
   /* ---------------- Yardımcılar ---------------- */

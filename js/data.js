@@ -14,6 +14,8 @@
                               answer, explain, errorLine?, output?}, ... ] }
      - traps : (isteğe bağlı) sınav tuzakları — TRAPS tablosundan eklenir.
                [{ title, text }] veya düz metin dizisi
+     - dependsOn : önkoşul kavram id'leri — DEPENDENCIES tablosundan eklenir.
+               Graf bu ilişkilerle Yönlü Döngüsüz Graf (DAG) olarak kurulur.
    ========================================================================= */
 
 const KNOWLEDGE = {
@@ -77,7 +79,7 @@ System.out.println(c1 == c2);     // false: farklı kimlik`,
         {
           id: "constructors",
           title: "Yapıcılar",
-          label: "Yapıcılar (Constructors)",
+          label: "Yapıcılar",
           def: "Yapıcı, nesne new ile oluşturulurken çağrılan, sınıfla aynı ada sahip ve dönüş tipi olmayan özel metottur. Hiç yazılmazsa derleyici parametresiz bir varsayılan yapıcı ekler.",
           code: `public class Student {
     private String name;
@@ -185,7 +187,7 @@ name.length(); // NullPointerException! //!`,
         {
           id: "inheritance",
           title: "Kalıtım",
-          label: "Kalıtım (Inheritance)",
+          label: "Kalıtım",
           def: "Mevcut bir sınıftan (süper sınıf) yeni bir sınıf türeterek alanları ve metotları yeniden kullanmaktır. \"is-a\" ilişkisini modeller. Java sınıflarda tekli kalıtımı destekler.",
           code: `public class GeometricObject {
     private String color = "white";
@@ -461,7 +463,7 @@ try {
         {
           id: "events-basics",
           title: "Olaylar",
-          label: "Olaylar (Events)",
+          label: "Olaylar",
           def: "Olay güdümlü programlamada kodun akışını kullanıcı eylemleri (tıklama, tuşa basma) veya sistem olayları belirler. Olayı üreten bileşene kaynak (source), olayı temsil eden nesneye olay nesnesi (ActionEvent, MouseEvent) denir.",
           code: `// Kaynak: button → Olay: ActionEvent → İşleyici: lambda
 Button btn = new Button("Tamam");
@@ -473,7 +475,7 @@ btn.setOnAction(e -> { //!
         {
           id: "listeners",
           title: "Dinleyiciler",
-          label: "Dinleyiciler (Listeners)",
+          label: "Dinleyiciler",
           def: "Dinleyici (listener/handler), bir olay arayüzünü (EventHandler<T>, ActionListener) uygulayan ve kaynağa kaydedilen nesnedir. Olay gerçekleşince kaynak, dinleyicinin metodunu çağırır.",
           code: `class OKHandler implements EventHandler<ActionEvent> { //!
     @Override
@@ -1508,12 +1510,79 @@ const TRAPS = {
   ],
 };
 
-// JS örneklerini, görevleri ve tuzakları kavramlara bağla
+/* =========================================================================
+   ÖNKOŞULLAR (DAG — Yönlü Döngüsüz Graf)
+   -------------------------------------------------------------------------
+   kavram → onu öğrenmeden önce bilinmesi gerekenler. Graftaki bağlar
+   artık merkezden değil, bu ilişkilerden çizilir (önkoşul → kavram).
+   Önkoşulu olmayan kavram bir "başlangıç" (kaynak) düğümüdür.
+   Döngü oluşturmamaya dikkat et; physics.js döngüyü tespit edip uyarır.
+   ========================================================================= */
+const DEPENDENCIES = {
+  /* ---------- Core OOP ---------- */
+  classes: [],
+  objects: ["classes"],
+  uml: ["classes"],
+  constructors: ["objects"],
+  "primitive-vs-object": ["objects"],
+  "reference-fields": ["primitive-vs-object"],
+  null: ["reference-fields"],
+  "garbage-collection": ["null"],
+  this: ["constructors"],
+  encapsulation: ["classes", "this"],
+
+  /* ---------- Advanced OOP ---------- */
+  inheritance: ["classes", "encapsulation"],
+  "super-sub": ["inheritance"],
+  super: ["super-sub", "constructors"],
+  overriding: ["super-sub"],
+  overloading: ["constructors"],
+  polymorphism: ["overriding"],
+  "dynamic-binding": ["polymorphism"],
+  casting: ["polymorphism", "primitive-vs-object"],
+  instanceof: ["casting"],
+  abstract: ["polymorphism"],
+  interfaces: ["abstract"],
+
+  /* ---------- İstisna Yönetimi ---------- */
+  throwable: ["inheritance"],
+  error: ["throwable"],
+  exception: ["throwable"],
+  "try-catch-finally": ["exception"],
+  throw: ["try-catch-finally"],
+  throws: ["throw"],
+  chained: ["throw"],
+  "custom-exceptions": ["throws", "super"],
+
+  /* ---------- Event-Driven ---------- */
+  "events-basics": ["objects"],
+  listeners: ["events-basics", "interfaces"],
+  "inner-classes": ["listeners"],
+  "anonymous-classes": ["inner-classes"],
+  lambda: ["anonymous-classes"],
+  "mouse-key-events": ["lambda"],
+  timer: ["lambda"],
+
+  /* ---------- GUI & I/O ---------- */
+  file: ["exception"],
+  scanner: ["file", "try-catch-finally"],
+  swing: ["listeners"],
+  javafx: ["events-basics", "overriding"],
+  "fx-animations": ["javafx", "timer"],
+
+  /* ---------- Tasarım Desenleri ---------- */
+  singleton: ["encapsulation"],
+  factory: ["interfaces"],
+  adapter: ["interfaces"],
+};
+
+// JS örneklerini, görevleri, tuzakları ve önkoşulları kavramlara bağla
 // (eksik olan kalırsa panel o sekmeyi/kutuyu göstermez)
 for (const cat of KNOWLEDGE.categories) {
   for (const concept of cat.concepts) {
     concept.js = JS_EXAMPLES[concept.id] ?? null;
     concept.quiz = QUIZZES[concept.id] ?? null;
     concept.traps = TRAPS[concept.id] ?? null;
+    concept.dependsOn = DEPENDENCIES[concept.id] ?? [];
   }
 }

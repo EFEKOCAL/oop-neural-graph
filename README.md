@@ -26,7 +26,9 @@ Hiçbir framework veya kütüphane kullanılmadı: yalnızca HTML, CSS ve modern
 
 | | |
 |---|---|
-| 🧠 **Nöral ağ haritası** | 6 kategori, 44 kavram. Yay (spring) fiziğiyle süzülen düğümler, parlayan bağlar ve bağlar boyunca akan sinyaller. Sürükle-bırak, kaydırma ve yakınlaştırma. |
+| 🧠 **Önkoşul ağı (DAG)** | 6 kategori, 44 kavram, 52 önkoşul bağı. Kavramlar soldan sağa öğrenme derinliğine göre dizilir; her ok "önce bunu öğren" demektir. Yay fiziğiyle süzülen düğümler, sürükle-bırak, kaydırma, yakınlaştırma. |
+| 🎓 **Müfredat Modu** | Topolojik sıralamayla önkoşulları tamamlanmış "sıradaki" kavramları bulur; yalnızca onları ve oraya giden yolu parlatır, kamerayı hedefe götürür. Kilit yok: istediğin an Serbest Dolaşım'a geçebilirsin. |
+| ✅ **İlerleme** | "Bunu Öğrendim" ile işaretlenen kavramlar yeşile döner, çıkan bağlarında sinyal hızlanır; yeni açılan kavramlar bildirilir. Tamamlanma oranı üstteki çubukta. |
 | 💻 **Çift dilli kod** | Her kavram için Java ve Vanilla JS (ES6 class) örneği; VS Code temalı görünüm, sözdizimi vurgulama ve kritik satırın parlatılması. |
 | 🎯 **Görevler** | 20 mini sınav. 5'i iki aşamalı *Derleme Tarayıcısı*: önce "Bu kod derlenir mi?", sonra "Çıktısı ne olur?" İlerleme tarayıcıda saklanır. |
 | 🚨 **Tuzaklar ve ipuçları** | Başlatma sırası, `finally` içindeki `return`, overload seçim önceliği gibi sınavlarda puan kaybettiren ince noktalar. |
@@ -77,7 +79,8 @@ python -m http.server 8000
 └── js/
     ├── data.js         # Kavramlar, JS örnekleri, görevler, tuzaklar
     ├── highlight.js    # Java / JS sözdizimi vurgulayıcı
-    ├── physics.js      # Graf modeli + yay fizik motoru
+    ├── physics.js      # DAG modeli, şeritli yerleşim, yay fizik motoru
+    ├── curriculum.js   # İlerleme, topolojik sıra, Müfredat Modu hedefleri
     ├── renderer.js     # Kamera, Canvas çizimi, parçacık efektleri
     ├── panel.js        # Bilgi paneli: kod sekmeleri, görevler, tuzaklar
     ├── search.js       # Arama ve filtreleme
@@ -93,7 +96,8 @@ data.js ──► buildGraph ──► PhysicsEngine ──► GraphRenderer + E
                 └──► InfoPanel ◄──── seçim ──────────┘   durumu birleştirir)
 ```
 
-- **Fizik:** Her düğüm, yerleşim noktasına bir yayla bağlıdır ve bu nokta yavaş sinüs dalgalarıyla salınır (ipe bağlı balon etkisi). Ebeveyn–çocuk bağları da yaydır; yakın düğümler birbirini iter. Entegrasyon 120 Hz sabit alt adımlı yarı-örtük Euler ile yapılır, bu yüzden kare hızı dalgalansa da sistem kararlıdır.
+- **Topoloji:** `dependsOn` ilişkilerinden Yönlü Döngüsüz Graf kurulur; Kahn algoritmasıyla topolojik sıra ve derinlik (en uzun önkoşul zinciri) hesaplanır, döngü varsa konsolda uyarılır. Sütun = derinlik, şerit = kategori.
+- **Fizik:** Her düğüm, yerleşim noktasına bir yayla bağlıdır ve bu nokta yavaş sinüs dalgalarıyla salınır (ipe bağlı balon etkisi). Önkoşul bağları da yaydır (anchor'dan zayıf tutulur, böylece çok bağlı ağda dolanma olmaz); yakın düğümler birbirini iter. Entegrasyon 120 Hz sabit alt adımlı yarı-örtük Euler ile yapılır, bu yüzden kare hızı dalgalansa da sistem kararlıdır.
 - **Çizim:** Glow efekti için pahalı `shadowBlur` yerine additive (`lighter`) karışım ve iki geçişli çizgiler kullanılır.
 - **Modüller:** Klasik `<script>` dosyaları sırayla yüklenir; bu sayede proje sunucu olmadan da çalışır.
 
@@ -107,6 +111,7 @@ Tüm içerik [`js/data.js`](js/data.js) dosyasındadır:
 | JS örneği | `JS_EXAMPLES` — anahtar: kavram `id` |
 | Görev | `QUIZZES` — tek aşamalı veya `stages` ile çok aşamalı |
 | Tuzak | `TRAPS` — `[{ title, text }]` |
+| Önkoşul | `DEPENDENCIES` — `id: ["önkoşul-id", ...]` |
 
 Kod örneklerinde satır sonuna `//!` yazarsan o satır panel açılınca parlatılır.
 

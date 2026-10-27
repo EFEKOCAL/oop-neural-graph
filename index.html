@@ -31,6 +31,25 @@
     <p>Düğüme tıkla · sürükleyip bırak · tekerlekle yakınlaş</p>
   </header>
 
+  <!-- Ağın tamamlanma oranı: ekranın en üstünde ince parlayan çizgi -->
+  <div class="progress-line" aria-hidden="true"><span id="progress-line-fill"></span></div>
+
+  <!-- Keşif modu + ilerleme -->
+  <div class="hud-top">
+    <div class="mode-toggle" id="mode-toggle" role="group" aria-label="Keşif modu" data-active="free">
+      <button type="button" data-mode="free" aria-pressed="true">🧭 Serbest Dolaşım</button>
+      <button type="button" data-mode="syllabus" aria-pressed="false">🎓 Müfredat Modu</button>
+    </div>
+    <div class="progress-pill" id="progress" role="progressbar" aria-label="Öğrenme ilerlemesi"
+         aria-valuemin="0" aria-valuemax="44" aria-valuenow="0">
+      <span class="progress-text" id="progress-text">0 / 44 öğrenildi · %0</span>
+      <span class="progress-track"><span class="progress-fill" id="progress-fill"></span></span>
+    </div>
+  </div>
+
+  <!-- Mikro ödül bildirimi (ör. "🔓 Yeni açılan: ...") -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <!-- Arama: yazdıkça eşleşmeyen düğümler soluklaşır, Enter en iyi sonucu açar -->
   <div class="search" role="search">
     <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -121,6 +140,7 @@
   <script src="js/data.js" defer></script>
   <script src="js/highlight.js" defer></script>
   <script src="js/physics.js" defer></script>
+  <script src="js/curriculum.js" defer></script>
   <script src="js/renderer.js" defer></script>
   <script src="js/panel.js" defer></script>
   <script src="js/search.js" defer></script>

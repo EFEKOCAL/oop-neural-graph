@@ -15,7 +15,7 @@
    kullanıcılar eski önbelleği bırakıp yeni sürümü alır.
    ========================================================================= */
 
-const CACHE_VERSION = "v2"; // v2: Tasarım Desenleri, tuzaklar, çok aşamalı görevler
+const CACHE_VERSION = "v3"; // v3: DAG topolojisi, ilerleme sistemi, Müfredat Modu
 const STATIC_CACHE = `oop-neural-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `oop-neural-runtime-${CACHE_VERSION}`;
 
@@ -28,6 +28,7 @@ const PRECACHE_URLS = [
   "./js/data.js",
   "./js/highlight.js",
   "./js/physics.js",
+  "./js/curriculum.js",
   "./js/renderer.js",
   "./js/panel.js",
   "./js/search.js",

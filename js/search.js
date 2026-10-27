@@ -2,9 +2,10 @@
    search.js — Arama ve filtreleme
    -------------------------------------------------------------------------
    Kullanıcı yazdıkça (input olayı) sorgu normalize edilir ve her düğümün
-   arama metniyle karşılaştırılır. Sonuç iki küme olarak tutulur:
+   arama metniyle (başlık, kısa ad, id, kategori) karşılaştırılır.
+   Sonuç iki küme olarak tutulur:
      - matches : sorguyla eşleşen düğümler (parlar, nabız halkası alır)
-     - focus   : eşleşenler + kökten onlara giden yol (görünür kalır)
+     - focus   : eşleşenler + DAG'deki tüm önkoşulları (oraya giden yol)
    main.js her karede bu kümelere bakarak geri kalanları soluklaştırır.
    ========================================================================= */
 
@@ -15,11 +16,11 @@ class GraphSearch {
   focus = new Set();
 
   constructor(graph) {
-    // Arama indeksi bir kez hazırlanır: başlık + kısa ad + id
+    // Arama indeksi bir kez hazırlanır: başlık + kısa ad + id + kategori
     this.#index = graph.nodes.map((node) => ({
       node,
       title: GraphSearch.normalize(node.title),
-      text: GraphSearch.normalize(`${node.title} ${node.label} ${node.id.replace(/-/g, " ")}`),
+      text: GraphSearch.normalize(`${node.title} ${node.label} ${node.id.replace(/-/g, " ")} ${node.parent?.title ?? ""}`),
     }));
   }
 
@@ -47,7 +48,8 @@ class GraphSearch {
     for (const { node, text } of this.#index) {
       if (!terms.every((t) => text.includes(t))) continue;
       this.matches.add(node);
-      for (const n of node.path) this.focus.add(n);
+      this.focus.add(node);
+      node.ancestors.forEach((a) => this.focus.add(a));
     }
     return this.matches.size;
   }
