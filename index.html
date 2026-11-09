@@ -1,174 +1,150 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Nesne Yönelimli Programlama kavramlarını interaktif bir nöral ağ haritası üzerinde keşfet.">
-  <title>OOP Neural Graph</title>
-
-  <!-- PWA: yüklenebilir uygulama + tema rengi + ikonlar -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#060912">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="OOP Graph">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BLM2005 Nesne Yönelimli Programlama için interaktif ders notları ve Java laboratuvarı">
+  <meta name="theme-color" content="#090d15">
+  <title>OOP Interactive Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111a28'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' font-weight='700' text-anchor='middle' fill='%2338bdf8'%3E%7B%7D%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Modüller">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 4c-2 0-2.5 1-2.5 2.5v3C5.5 11 4.8 12 3.5 12c1.3 0 2 1 2 2.5v3C5.5 19 6 20 8 20"/>
+            <path d="M16 4c2 0 2.5 1 2.5 2.5v3c0 1.5.7 2.5 2 2.5-1.3 0-2 1-2 2.5v3c0 1.5-.5 2.5-2.5 2.5"/>
+            <circle cx="12" cy="12" r="1.6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">OOP Interactive Lab</div>
+          <div class="brand-sub">Nesne Yönelimli Programlama</div>
+        </div>
+      </div>
 
-  <!-- Tüm graf (düğümler, bağlar, parçacıklar) tek bir canvas üzerinde çizilir -->
-  <canvas id="graph" role="img" aria-label="OOP kavramlarının nöral ağ haritası"></canvas>
+      <div class="nav-label">1 · Ders (önce teori)</div>
+      <nav class="nav">
+        <a class="nav-item" href="#/learn" data-route="learn">
+          <span class="nav-num">★</span>
+          <span class="nav-text"><span class="nav-title">Başlangıç</span><span class="nav-sub">Kaldığın yerden devam et</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/plan" data-route="learn">
+          <span class="nav-num">≡</span>
+          <span class="nav-text"><span class="nav-title">Genel Bakış</span><span class="nav-sub">Çalışma yöntemi, dönem planı</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/ch0" data-route="learn">
+          <span class="nav-num">B0</span>
+          <span class="nav-text"><span class="nav-title">Java Temelleri</span><span class="nav-sub">Tipler, Scanner, metotlar</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/ch1" data-route="learn">
+          <span class="nav-num">B1</span>
+          <span class="nav-text"><span class="nav-title">Sınıflar ve Nesneler</span><span class="nav-sub">Yapıcı, static, this, ArrayList</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/ch2" data-route="learn">
+          <span class="nav-num">B2</span>
+          <span class="nav-text"><span class="nav-title">Kalıtım ve Çok Biçimlilik</span><span class="nav-sub">super, override, dinamik bağlama</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/ch3" data-route="learn">
+          <span class="nav-num">B3</span>
+          <span class="nav-text"><span class="nav-title">İstisnalar ve Metin I/O</span><span class="nav-sub">try-catch-finally, File, Scanner</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/ch4" data-route="learn">
+          <span class="nav-num">B4</span>
+          <span class="nav-text"><span class="nav-title">Soyut Sınıf ve Arayüz</span><span class="nav-sub">Vize sonrası · erken bakış</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/ch5" data-route="learn">
+          <span class="nav-num">B5</span>
+          <span class="nav-text"><span class="nav-title">Vize Provası</span><span class="nav-sub">Karma kod izleme, deneme</span></span>
+        </a>
+        <a class="nav-item" href="#/learn/sorular" data-route="learn">
+          <span class="nav-num">?</span>
+          <span class="nav-text"><span class="nav-title">Sınav Soruları</span><span class="nav-sub">Aralıklı tekrar</span></span>
+          <span class="badge badge-live">Sınav</span>
+        </a>
+      </nav>
 
-  <!-- ===================== HUD (canvas üstü arayüz) ===================== -->
-  <header class="hud-title">
-    <h1>OOP <span>Neural Knowledge Graph</span></h1>
-    <p>Düğüme tıkla · sürükleyip bırak · tekerlekle yakınlaş</p>
-  </header>
+      <div class="nav-label nav-label-2">2 · Laboratuvar (pratik)</div>
+      <nav class="nav">
+        <a class="nav-item" href="#/memory" data-route="memory">
+          <span class="nav-num">L1</span>
+          <span class="nav-text"><span class="nav-title">Stack &amp; Heap</span><span class="nav-sub">Bölüm 1 · referanslar, null, GC</span></span>
+        </a>
+        <a class="nav-item" href="#/dispatch" data-route="dispatch">
+          <span class="nav-num">L2</span>
+          <span class="nav-text"><span class="nav-title">Kalıtım Laboratuvarı</span><span class="nav-sub">Bölüm 2 · yapıcı zinciri, bağlama</span></span>
+        </a>
+        <a class="nav-item" href="#/exceptions" data-route="exceptions">
+          <span class="nav-num">L3</span>
+          <span class="nav-text"><span class="nav-title">İstisna Akışı</span><span class="nav-sub">Bölüm 3 · yayılım, finally</span></span>
+        </a>
+      </nav>
 
-  <!-- Ağın tamamlanma oranı: ekranın en üstünde ince parlayan çizgi -->
-  <div class="progress-line" aria-hidden="true"><span id="progress-line-fill"></span></div>
+      <div class="sidebar-foot">
+        <div><kbd>I</kbd> Bilgi &amp; Sınav paneli</div>
+        <div><kbd>Esc</kbd> Paneli kapat</div>
+      </div>
+    </aside>
 
-  <!-- Keşif modu + ilerleme -->
-  <div class="hud-top">
-    <div class="mode-toggle" id="mode-toggle" role="group" aria-label="Keşif modu" data-active="free">
-      <button type="button" data-mode="free" aria-pressed="true">🧭 Serbest Dolaşım</button>
-      <button type="button" data-mode="syllabus" aria-pressed="false">🎓 Müfredat Modu</button>
-    </div>
-    <div class="progress-pill" id="progress" role="progressbar" aria-label="Öğrenme ilerlemesi"
-         aria-valuemin="0" aria-valuemax="179" aria-valuenow="0">
-      <span class="progress-text" id="progress-text">0 / 179 öğrenildi · %0</span>
-      <span class="progress-track"><span class="progress-fill" id="progress-fill"></span></span>
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="Menüyü aç" aria-controls="sidebar" aria-expanded="false">☰</button>
+        <div class="crumbs">
+          <span class="crumb-num" id="page-num">T</span>
+          <h1 id="page-title">Ders Notları</h1>
+          <span class="page-sub" id="page-sub"></span>
+        </div>
+        <span class="status" id="status"><i class="led"></i><span id="status-text">STANDBY</span></span>
+      </header>
+      <main class="content" id="view"></main>
     </div>
   </div>
 
-  <!-- Mikro ödül bildirimi (ör. "🔓 Yeni açılan: ...") -->
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="scrim" id="scrim"></div>
 
-  <!-- Arama: yazdıkça eşleşmeyen düğümler soluklaşır, Enter en iyi sonucu açar -->
-  <div class="search" role="search">
-    <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="7"></circle>
-      <path d="M20 20l-3.5-3.5"></path>
+  <button class="info-fab" id="info-fab" type="button" aria-expanded="false" aria-controls="info-panel">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/>
     </svg>
-    <input id="search-input" type="search" placeholder="Kavram ara…" autocomplete="off" spellcheck="false"
-           aria-label="Kavram ara" aria-describedby="search-count">
-    <span class="search-count" id="search-count" aria-live="polite"></span>
-    <kbd aria-hidden="true">/</kbd>
-  </div>
+    Bilgi &amp; Sınav
+  </button>
 
-  <!-- Klavye / ekran okuyucu kullanıcıları için kavram listesi (odaklanınca görünür) -->
-  <nav class="a11y-nav" id="a11y-nav" aria-label="Kavram listesi"></nav>
-
-  <!-- Kategori lejantı: JS doldurur -->
-  <nav class="legend" id="legend" aria-label="Kategoriler"></nav>
-
-  <div class="zoom-controls" role="group" aria-label="Yakınlaştırma">
-    <button class="icon-btn" data-zoom="in" aria-label="Yakınlaştır">+</button>
-    <button class="icon-btn" data-zoom="out" aria-label="Uzaklaştır">−</button>
-    <button class="icon-btn" data-zoom="reset" aria-label="Görünümü sıfırla">⟳</button>
-  </div>
-
-  <!-- ===================== BİLGİ PANELİ ===================== -->
-  <aside class="panel" id="panel" aria-labelledby="panel-title" inert>
-    <header class="panel-head">
-      <nav class="crumbs" id="panel-crumbs" aria-label="Konum"></nav>
-      <button class="icon-btn" id="panel-close" aria-label="Paneli kapat">✕</button>
+  <aside class="info-panel" id="info-panel" aria-hidden="true" aria-label="Bilgi ve Sınav Paneli">
+    <header class="info-head">
+      <div>
+        <div class="info-title">Bilgi &amp; Sınav Paneli</div>
+        <div class="info-module" id="info-module"></div>
+      </div>
+      <button class="icon-btn info-close" type="button" aria-label="Paneli kapat">×</button>
     </header>
-
-    <div class="panel-body" id="panel-body">
-      <span class="chip" id="panel-chip"></span>
-      <h2 id="panel-title"></h2>
-      <p class="panel-def" id="panel-def"></p>
-
-      <!-- VS Code temalı kod görünümü (önceki projeden gelen highlight mantığı) -->
-      <section class="editor" id="panel-editor" aria-label="Kod örneği">
-        <div class="editor-bar">
-          <span class="traffic" aria-hidden="true"><i></i><i></i><i></i></span>
-          <!-- Sekmeler: data-tab değeri panel.js'te kavramın code / js / quiz alanını seçer -->
-          <div class="editor-tabs" id="panel-tabs" role="tablist" aria-label="Kod ve görev">
-            <button class="editor-tab" type="button" role="tab" data-tab="java" aria-selected="true">
-              <span class="file-icon java">J</span>Java
-            </button>
-            <button class="editor-tab" type="button" role="tab" data-tab="js" aria-selected="false">
-              <span class="file-icon js">JS</span>Vanilla JS
-            </button>
-            <button class="editor-tab" type="button" role="tab" data-tab="quiz" aria-selected="false">
-              <span class="file-icon quiz">◎</span>Görev
-            </button>
-            <button class="editor-tab" type="button" role="tab" data-tab="practice" aria-selected="false"
-                    title="Akıllı Ev kodlama pratiği (yalnızca uygulamalı kavramlarda)">
-              <span class="file-icon practice">⌨</span>Pratik
-            </button>
-          </div>
-          <button class="copy-btn" id="panel-copy" type="button">Kopyala</button>
-        </div>
-        <pre class="code-view" role="tabpanel"><code id="panel-code"></code></pre>
-
-        <!-- Görev sekmesi: mini sınav -->
-        <div class="quiz" id="panel-quiz" role="tabpanel" hidden>
-          <div class="quiz-head">
-            <span class="quiz-badge">Mini Görev</span>
-            <span class="quiz-progress" id="quiz-progress"></span>
-          </div>
-          <p class="quiz-question" id="quiz-question"></p>
-          <pre class="code-view quiz-code"><code id="quiz-code"></code></pre>
-          <div class="quiz-options" id="quiz-options"></div>
-          <p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
-        </div>
-
-        <!-- Pratik sekmesi: "Akıllı Ev" kod laboratuvarı (doğrulama tarayıcıda) -->
-        <div class="practice" id="panel-practice" role="tabpanel" hidden>
-          <div class="quiz-head">
-            <span class="quiz-badge">🏠 Akıllı Ev Laboratuvarı</span>
-            <span class="practice-step" id="practice-step"></span>
-          </div>
-          <p class="practice-instruction" id="practice-instruction"></p>
-          <div class="practice-editor">
-            <pre class="practice-gutter" id="practice-gutter" aria-hidden="true"></pre>
-            <textarea id="practice-code" wrap="off" spellcheck="false" autocomplete="off"
-                      autocapitalize="off" aria-label="Kod editörü" aria-describedby="practice-instruction"></textarea>
-          </div>
-          <div class="practice-actions">
-            <button class="practice-reset" id="practice-reset" type="button">↺ Taslağa dön</button>
-            <kbd class="practice-hint">Ctrl + Enter</kbd>
-            <button class="practice-run" id="practice-run" type="button">▶ Kodu Test Et</button>
-          </div>
-          <p class="practice-feedback" id="practice-feedback" aria-live="polite"></p>
-        </div>
-        <footer class="statusbar">
-          <span id="panel-file">Ornek.java</span>
-          <span id="panel-status">Ln 1</span>
-          <span>UTF-8</span>
-        </footer>
-      </section>
-
-      <section class="related">
-        <h3 id="panel-related-title">İlgili kavramlar</h3>
-        <div class="chips" id="panel-related"></div>
-      </section>
+    <div class="info-tabs" role="tablist">
+      <button class="info-tab" type="button" role="tab" data-tab="theory">Teori</button>
+      <button class="info-tab" type="button" role="tab" data-tab="exam">Sınav Soruları <span class="count" id="exam-count">0</span></button>
     </div>
-
-    <footer class="panel-nav">
-      <button class="nav-btn" id="panel-prev" type="button">← Önceki</button>
-      <button class="nav-btn" id="panel-next" type="button">Sonraki →</button>
-    </footer>
+    <div class="info-pane" id="info-theory" role="tabpanel"></div>
+    <div class="info-pane" id="info-exam" role="tabpanel" hidden></div>
   </aside>
 
-  <!-- Modüller sırayla yüklenir (classic script: file:// ile çift tıklayınca da çalışır) -->
-  <script src="js/data.js" defer></script>
-  <script src="js/subtopics.js" defer></script>
-  <script src="js/highlight.js" defer></script>
-  <script src="js/physics.js" defer></script>
-  <script src="js/curriculum.js" defer></script>
-  <script src="js/renderer.js" defer></script>
-  <script src="js/panel.js" defer></script>
-  <script src="js/search.js" defer></script>
-  <script src="js/main.js" defer></script>
+  <!-- sıra önemli: sözlük → bilgi paneli; şekil motoru → java → ders verisi (kod şekillerini kaydeder) -->
+  <script src="js/data/glossary.js" defer></script>
+  <script src="js/data/info-content.js" defer></script>
+  <script src="js/data/chapter-outlines.js" defer></script>
+  <script src="js/data/exam-questions.js" defer></script>
+  <script src="js/views/diagrams.js" defer></script>
+  <script src="js/views/java.js" defer></script>
+  <script src="js/data/lessons-ch0.js" defer></script>
+  <script src="js/data/lessons-ch1.js" defer></script>
+  <script src="js/data/lessons-ch2.js" defer></script>
+  <script src="js/data/lessons-ch3.js" defer></script>
+  <script src="js/data/lessons-ch4.js" defer></script>
+  <script src="js/data/lessons-ch5.js" defer></script>
+  <script src="js/views/learn-view.js" defer></script>
+  <script src="js/labs/memory-view.js" defer></script>
+  <script src="js/labs/dispatch-view.js" defer></script>
+  <script src="js/labs/exception-view.js" defer></script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>

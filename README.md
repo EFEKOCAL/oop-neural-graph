@@ -1,133 +1,76 @@
-<div align="center">
+# OOP Interactive Lab
 
-<img src="icons/icon.svg" width="96" height="96" alt="OOP Neural Knowledge Graph logosu">
+BLM2005 **Nesne Yönelimli Programlama** dersinin teorisini kart kart ilerleyen ders notları ve **interaktif Java laboratuvarlarıyla** öğreten tek sayfalık web uygulaması. Saf HTML, CSS ve JavaScript ile yazıldı; hiçbir dış kütüphane veya kurulum gerektirmez. Arayüz ve ders motoru, [İşletim Sistemleri çalışma sitesi](https://efekocal.github.io/isletim-sistemleri/) ile aynı tasarım dilindedir.
 
-# OOP Neural Knowledge Graph
+**Canlı site:** https://efekocal.github.io/oop-neural-graph/
 
-**Nesne Yönelimli Programlama kavramlarını fizik tabanlı, interaktif bir nöral ağ haritasında keşfet.**
+## Önce teori: Ders Notları
 
-[**🚀 Canlı Demo**](https://efekocal.github.io/oop-neural-graph/)
+Site, ortasında büyük bir **Başla** düğmesi ve tepesinde konu konu dolan bir ilerleme çubuğu olan sade bir ekranla açılır. Dersler tek ekranlık kartlar halinde dikey olarak ilerler: kaydır, ok tuşlarını veya **Devam** düğmesini kullan.
 
-![Vanilla JS](https://img.shields.io/badge/Vanilla_JS-ES2022-f7df1e?logo=javascript&logoColor=black)
-![Canvas](https://img.shields.io/badge/Canvas_2D-60_fps-4fc3f7)
-![PWA](https://img.shields.io/badge/PWA-offline_ready-5a0fc8?logo=pwa&logoColor=white)
-![Bağımlılık](https://img.shields.io/badge/bağımlılık-0-34d399)
-![Lisans](https://img.shields.io/badge/lisans-MIT-blue)
+Hocanın PDF'leri (Liang, *Introduction to Java Programming*) slayt sırasıyla kısa derslere bölünmüştür:
 
-</div>
+| Bölüm | Kaynak | Dersler |
+|---|---|---|
+| 0 · Java Temelleri | Lab Hafta 1–3 | Program iskeleti, ilkel tipler, Scanner, karar/döngü, metotlar ve overloading, diziler |
+| 1 · Sınıflar ve Nesneler | Slide01_BPII.pdf | Nesne/sınıf, UML, yapıcılar, referanslar, null, GC, Date/Random, static, görünürlük, kapsülleme, pass-by-value, immutable, kapsam, this, nesne dizileri, ArrayList, wrapper |
+| 2 · Kalıtım ve Çok Biçimlilik | Slide02_BPII.pdf | extends, super, yapıcı zinciri, Apple/Fruit hatası, override, override vs overload, Object/toString, polimorfizm, eşleştirme vs bağlama, casting, equals, protected, final |
+| 3 · İstisnalar ve Metin I/O | Slide03_BPII.pdf | Motivasyon, avantajlar, hiyerarşi, checked/unchecked, throw/throws/catch, çoklu catch, yayılım, finally, rethrow, özel istisna, File, PrintWriter, try-with-resources, Scanner, ReplaceText, web'den okuma |
+| 4 · Soyut Sınıf ve Arayüz | Liang Bölüm 13 | Vize sonrası konu, erken bakış |
+| 5 · Vize Provası | — | Karma kod izleme ve 16 soruluk deneme |
 
----
+Her ders aynı döngüyü izler:
 
-Üniversite OOP müfredatındaki kavramları (sınıflar ve nesnelerden istisna yönetimine, olay güdümlü programlamadan tasarım desenlerine) tek bir zihin haritasında toplar. Her düğüme tıkladığında tanımı, **Java** ve **Vanilla JS** kod örneklerini, sınavlarda sık düşülen **tuzakları** ve kendini sınayabileceğin **mini görevleri** görürsün.
+1. **Okumadan önce düşün:** Ders, sonundaki ilk soruyla açılır.
+2. **Oku:** Tanımlar, tablolar, slayt numaraları. "Neden böyle?", "Sınav tuzağı" ve slayt hatası kutuları.
+3. **Kodda gör:** 59 kod şekli. Programı **İleri** ile satır satır yürüt; vurgulanan satırı, değişken tablosunu ve konsolu izle.
+4. **Kendini yokla:** Çoktan seçmeli ve boşluk doldurma soruları otomatik puanlanır.
+5. **Laboratuvarda dene:** İlgili dersin sonunda laboratuvar düğmesi var.
 
-Hiçbir framework veya kütüphane kullanılmadı: yalnızca HTML, CSS ve modern JavaScript.
+Her bölümün sonunda bir **bölüm tekrarı** gelir. **Sınav Soruları** sayfasında açık uçlu sorular, model cevaplar ve anahtar noktalar vardır; sorular aralıklı tekrarla çalışılır. Soruların kaynağı etiketlidir: **Slayttan** (soru hocanın slaytında var) ya da **Sınav tipi** (slayt içeriğinden yazıldı). Hocanın gerçek soruları `js/data/exam-questions.js` dosyasına eklenebilir (şablon dosyanın başında).
 
-## ✨ Özellikler
+## Laboratuvarlar
 
-| | |
-|---|---|
-| 🧠 **Önkoşul ağı (DAG)** | 6 kategori, 55 kavram, 64 önkoşul bağı. Kavramlar dersin resmî akışına göre (Sınıf/Nesne → Kalıtım → İstisnalar → Soyut Sınıf/Arayüz → Olaylar → JavaFX → Özyineleme → Generics → Tasarım Desenleri) soldan sağa dizilir; her ok "önce bunu öğren" demektir. Yay fiziğiyle süzülen düğümler, sürükle-bırak, kaydırma, yakınlaştırma. |
-| 🛰️ **Uydu alt konular** | Ders slaytlarındaki 124 ayrıntı (ör. *this(...) zinciri*, *JRadioButton + ButtonGroup*, *Sudoku*, *BounceBall*) ana kavramın etrafında küçük aylar olarak döner; kavram seçilince ya da üzerine gelinince halka hâlinde açılır. Her biri tanım, ders kodu ve çoğunda görev/tuzak içerir. |
-| 🎓 **Müfredat Modu** | Topolojik sıralamayla önkoşulları tamamlanmış "sıradaki" kavramları bulur; yalnızca onları ve oraya giden yolu parlatır, kamerayı hedefe götürür. Kilit yok: istediğin an Serbest Dolaşım'a geçebilirsin. |
-| ✅ **İlerleme** | "Bunu Öğrendim" ile işaretlenen kavramlar yeşile döner, çıkan bağlarında sinyal hızlanır; yeni açılan kavramlar bildirilir. Tamamlanma oranı üstteki çubukta. |
-| 💻 **Çift dilli kod** | Her kavram için Java ve Vanilla JS (ES6 class) örneği; VS Code temalı görünüm, sözdizimi vurgulama ve kritik satırın parlatılması. |
-| ⌨️ **Akıllı Ev Pratiği** | 13 bölümlük kodlama laboratuvarı: Device → Light → Thermostat hikâyesi sınıflardan arayüzlere kadar adım adım büyür. Kod tarayıcıda yazılır ve metin kurallarıyla anında denetlenir; geçilen bölüm grafta "öğrenildi" olur. |
-| 🎯 **Görevler** | 70 mini sınav. 8'i iki aşamalı *Derleme Tarayıcısı*: önce "Bu kod derlenir mi?", sonra "Çıktısı ne olur?" İlerleme tarayıcıda saklanır. |
-| 🚨 **Tuzaklar ve ipuçları** | Başlatma sırası, `finally` içindeki `return`, overload seçim önceliği gibi sınavlarda puan kaybettiren ince noktalar. |
-| 🔎 **Anlık arama** | Türkçe karakterlere duyarsız (`kalitim` → *Kalıtım*). Eşleşen düğümler ve kökten onlara giden yol parlar, gerisi soluklaşır. |
-| 📱 **PWA** | Çevrimdışı çalışır; masaüstüne veya telefona uygulama olarak yüklenebilir. |
-| ♿ **Erişilebilirlik** | Klavye ile tam kullanım, ekran okuyucu için kavram listesi, `prefers-reduced-motion` desteği. |
+| # | Modül | İçerik |
+|---|---|---|
+| L1 | **Stack & Heap** | Referans değişkenleri, atama ve aliasing, çöp toplama, pass-by-value, static alanın tek kopyası, nesne dizisi ve NullPointerException. Stack çerçeveleri, heap nesneleri ve referans okları canlı çizilir. |
+| L2 | **Kalıtım Laboratuvarı** | **Yapıcı zinciri:** kod sınıf modelinden üretilir, `this(...)` / `super(...)` / gizli `super()` adım adım yorumlanır, Apple/Fruit gibi derleme hataları bulunur. **Dinamik bağlama:** bildirilen tip, gerçek tip ve çağrı seçilir; önce derleyicinin eşleştirmesi, sonra JVM'in arama yolu gösterilir; downcast ve ClassCastException. |
+| L3 | **İstisna Akışı** | main → method1 → method2 → method3 zinciri; her metoda catch, finally, throws eklenir. Checked istisnalarda "yakala ya da bildir" ve "hiç fırlatılmayan istisna yakalanamaz" derleme kontrolleri, ardından yayılım adım adım. |
 
-### Klavye kısayolları
+Her modülün sağ alt köşesinde teori ve sınav sorularını içeren **Bilgi & Sınav paneli** bulunur; sorular "▶ Laboratuvarda dene" ile ilgili ayarla açılır. Ders Notları modülünün panelinde aranabilir **kavram sözlüğü** vardır.
+
+## Kullanım
+
+- **Online:** Yukarıdaki canlı site bağlantısını aç.
+- **Yerelde:** Depoyu indir ve `index.html` dosyasına çift tıkla. Sunucu gerekmez.
 
 | Tuş | İşlev |
 |---|---|
-| <kbd>/</kbd> veya <kbd>Ctrl</kbd>+<kbd>K</kbd> | Aramaya odaklan |
-| <kbd>Enter</kbd> | Aramadaki en iyi sonucu aç |
-| <kbd>←</kbd> <kbd>→</kbd> | Aynı kategorideki önceki / sonraki kavram |
-| <kbd>Esc</kbd> | Aramayı temizle / paneli kapat |
+| `I` | Bilgi & Sınav panelini aç/kapat |
+| `Esc` | Paneli kapat |
+| `↓` `↑` `Boşluk` | Ders akışında sonraki / önceki kart |
 
-## 📚 İçerik
+## Doğruluk
 
-| Kategori | Kavramlar |
-|---|---|
-| **Core OOP** | Nesneler, Sınıflar, UML Sınıf Diyagramı, Yapıcılar, İlkel vs Nesne Türleri, Çöp Toplama, Kapsülleme, `this`, Referans Veri Alanları, `null`, Görünürlük Belirleyiciler, `static`, Çok Boyutlu Diziler, `ArrayList` |
-| **Advanced OOP** | Kalıtım, Süper/Alt Sınıflar, `super`, Overriding, Overloading, Polymorphism, Dinamik Bağlama, Casting, `instanceof`, `Object` (toString/equals), Soyut Sınıflar, Arayüzler, Özyineleme, Generics |
-| **İstisna Yönetimi** | `Throwable`, `Error`, `Exception`, try-catch-finally, `throws`, `throw`, Zincirleme İstisna, Özel İstisnalar |
-| **Event-Driven** | Olaylar, Dinleyiciler, İç Sınıflar, Anonim Sınıflar, Lambda, Fare/Klavye Olayları, `Timer` |
-| **GUI & I/O** | `File`, `PrintWriter`, `Scanner`, Swing, Swing Bileşenleri, JavaFX (Stage/Scene), Layout Panelleri, Şekiller, JavaFX Animasyonları |
+Ders kodlarının tamamı JDK 21 ile derlenip çalıştırıldı; şekillerdeki konsol çıktıları gerçek çıktıyla aynıdır (hash ve tarih gibi her çalıştırmada değişen değerler hariç). Kalıtım ve istisna laboratuvarlarının ürettiği kodlar da tüm hazır senaryolarda derlenip simülasyonun çıktısıyla karşılaştırıldı.
 
-Alt konular, dersin BP-II slaytlarını (Liang, *Introduction to Java Programming*) bölüm bölüm kapsar: Sınıf/Nesne + ArrayList, Kalıtım/Çok Biçimlilik, İstisnalar/Metin G/Ç, Soyut Sınıf/Arayüz, Olay Güdümlü Programlama (Swing + JavaFX), Swing Bileşenleri, JavaFX Temelleri ve Animasyonlar, Çok Boyutlu Diziler.
-| **Tasarım Desenleri** | Singleton, Factory Method, Adapter |
-
-## 🚀 Yerelde çalıştırma
-
-Derleme adımı ve bağımlılık yoktur. Herhangi bir statik sunucu yeterlidir:
-
-```bash
-npx serve .
-# veya
-python -m http.server 8000
-```
-
-> `index.html` dosyasını doğrudan açmak da çalışır; ancak çevrimdışı mod (Service Worker) yalnızca `http(s)` üzerinden açıldığında devreye girer.
-
-## 🗂️ Proje yapısı
+## Dosya yapısı
 
 ```
-├── index.html          # Uygulama kabuğu (canvas, panel, arama)
-├── style.css           # Dark tema, panel, VS Code editörü, animasyonlar
-├── manifest.json       # PWA manifesti
-├── sw.js               # Service Worker (çevrimdışı önbellek)
-├── icons/              # Uygulama ikonları (SVG + PNG)
-└── js/
-    ├── data.js         # Kavramlar, JS örnekleri, görevler, tuzaklar, pratikler
-    ├── subtopics.js    # Uydu alt konular (slayt ayrıntıları, ders kodları, görevler)
-    ├── highlight.js    # Java / JS sözdizimi vurgulayıcı
-    ├── physics.js      # DAG modeli, şeritli yerleşim, yay fizik motoru
-    ├── curriculum.js   # İlerleme, topolojik sıra, Müfredat Modu hedefleri
-    ├── renderer.js     # Kamera, Canvas çizimi, parçacık efektleri
-    ├── panel.js        # Bilgi paneli: kod sekmeleri, görevler, pratik editörü
-    ├── search.js       # Arama ve filtreleme
-    └── main.js         # Uygulama denetleyicisi, giriş olayları, döngü
+index.html                  uygulama kabuğu (menü, üst bar, bilgi paneli)
+style.css                   koyu tema "control center" arayüzü + OOP eklemeleri
+sw.js                       eski sürümün service worker'ını temizler
+js/
+  app.js                    yönlendirme, bilgi & sınav paneli
+  views/diagrams.js         şekil motoru (explorer, stepper, tabs, custom)
+  views/java.js             Java renklendirme ve "kodu adım adım izle" şekli
+  views/learn-view.js       Ders Notları: başlangıç, kart akışı, bölüm tekrarı, sınav soruları
+  labs/memory-view.js       L1 Stack & Heap
+  labs/dispatch-view.js     L2 yapıcı zinciri ve dinamik bağlama (simulateChain / simulateBind)
+  labs/exception-view.js    L3 istisna akışı (simulate)
+  data/lessons-ch0..5.js    ders notları (bölüm başına bir dosya) ve kod şekilleri
+  data/chapter-outlines.js  bölüm giriş sayfaları
+  data/exam-questions.js    sınav soruları, model cevaplar, anahtar noktalar
+  data/info-content.js      laboratuvarların Bilgi & Sınav paneli
+  data/glossary.js          kavram sözlüğü
 ```
-
-## 🧩 Mimari
-
-```
-data.js ──► buildGraph ──► PhysicsEngine ──► GraphRenderer + Effects ──► <canvas>
-                │                                    ▲
-                ├──► GraphSearch ────────────────────┤  (main.js her karede
-                └──► InfoPanel ◄──── seçim ──────────┘   durumu birleştirir)
-```
-
-- **Topoloji:** `dependsOn` ilişkilerinden Yönlü Döngüsüz Graf kurulur; Kahn algoritmasıyla topolojik sıra ve derinlik (en uzun önkoşul zinciri) hesaplanır, döngü varsa konsolda uyarılır. Sütun = derinlik, şerit = kategori.
-- **Fizik:** Her düğüm, yerleşim noktasına bir yayla bağlıdır ve bu nokta yavaş sinüs dalgalarıyla salınır (ipe bağlı balon etkisi). Önkoşul bağları da yaydır (anchor'dan zayıf tutulur, böylece çok bağlı ağda dolanma olmaz); yakın düğümler birbirini iter. Entegrasyon 120 Hz sabit alt adımlı yarı-örtük Euler ile yapılır, bu yüzden kare hızı dalgalansa da sistem kararlıdır.
-- **Çizim:** Glow efekti için pahalı `shadowBlur` yerine additive (`lighter`) karışım ve iki geçişli çizgiler kullanılır.
-- **Modüller:** Klasik `<script>` dosyaları sırayla yüklenir; bu sayede proje sunucu olmadan da çalışır.
-
-## ✍️ İçerik ekleme
-
-Ana içerik [`js/data.js`](js/data.js), alt konular [`js/subtopics.js`](js/subtopics.js) dosyasındadır:
-
-| Ne eklenecek | Nereye |
-|---|---|
-| Yeni kavram | `KNOWLEDGE.categories[].concepts` — `{ id, title, def, code }` |
-| JS örneği | `JS_EXAMPLES` — anahtar: kavram `id` |
-| Görev | `QUIZZES` — tek aşamalı veya `stages` ile çok aşamalı |
-| Tuzak | `TRAPS` — `[{ title, text }]` |
-| Önkoşul | `DEPENDENCIES` — `id: ["önkoşul-id", ...]` |
-| Alt konu (uydu) | `js/subtopics.js` → `SUBTOPICS` — anahtar: ana kavram `id`, değer: `[{ id, title, label?, def, code?, quiz?, traps? }]` |
-| Pratik | `PRACTICES` — `{ instruction, skeleton, validationKeys, successMessage }` (taslak kod kuralları geçmemeli) |
-
-Kod örneklerinde satır sonuna `//!` yazarsan o satır panel açılınca parlatılır.
-
-> **Yayınlamadan önce:** `sw.js` içindeki `CACHE_VERSION` değerini artır; aksi hâlde daha önce siteyi açmış kullanıcılar eski sürümü görebilir.
-
-## 🌐 Yayınlama
-
-`main` dalına yapılan her push, [GitHub Actions](.github/workflows/pages.yml) ile otomatik olarak GitHub Pages'e yayınlanır.
-
-## 📄 Lisans
-
-[MIT](LICENSE)
