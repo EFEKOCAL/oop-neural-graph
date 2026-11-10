@@ -1,6 +1,6 @@
 # OOP Interactive Lab
 
-BLM2005 **Nesne Yönelimli Programlama** dersinin teorisini kart kart ilerleyen ders notları ve **interaktif Java laboratuvarlarıyla** öğreten tek sayfalık web uygulaması. Saf HTML, CSS ve JavaScript ile yazıldı; hiçbir dış kütüphane veya kurulum gerektirmez. Arayüz ve ders motoru, [İşletim Sistemleri çalışma sitesi](https://efekocal.github.io/isletim-sistemleri/) ile aynı tasarım dilindedir.
+BLM2005 **Nesne Yönelimli Programlama** dersinin teorisini kart kart ilerleyen ders notları ve **interaktif Java laboratuvarlarıyla** öğreten tek sayfalık web uygulaması. Saf HTML, CSS ve JavaScript ile yazıldı; hiçbir dış kütüphane veya kurulum gerektirmez.
 
 **Canlı site:** https://efekocal.github.io/oop-neural-graph/
 
