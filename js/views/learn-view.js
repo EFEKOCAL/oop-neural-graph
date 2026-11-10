@@ -124,6 +124,45 @@
   const javaLines = (code) => `<pre class="l-code jcode">${OOPLab.java.highlight(String(code).replace(/^\n+|\s+$/g, ''))}</pre>`;
   const normAns = (s) => String(s).replace(/\s+/g, '').replace(/;$/, '');
 
+  // Kavram boşluklarında Türkçe–İngilizce karşılıklar: gruptaki bir terim kabul ediliyorsa hepsi kabul edilir
+  const SYN = [
+    ['değişmez', 'değiştirilemez', 'immutable'],
+    ['dinamik bağlama', 'dynamic binding', 'geç bağlama', 'late binding', 'dinamik bağlanma'],
+    ['marker', 'işaretleyici', 'marker interface', 'işaretleyici arayüz', 'işaretçi', 'etiket'],
+    ['wrapper', 'sarmalayıcı', 'wrapper class', 'sarmalayıcı sınıf', 'zarf'],
+    ['kapsülleme', 'encapsulation', 'sarmalama'],
+    ['kalıtım', 'inheritance', 'miras', 'kalıtım (inheritance)'],
+    ['polimorfizm', 'polymorphism', 'çok biçimlilik', 'çokbiçimlilik'],
+    ['override', 'overriding', 'geçersiz kılma', 'ezme', 'üzerine yazma'],
+    ['overload', 'overloading', 'aşırı yükleme'],
+    ['soyut', 'abstract'],
+    ['arayüz', 'interface', 'arayüzler', 'interfaces'],
+    ['casting', 'cast', 'tip dönüşümü', 'tür dönüşümü', 'dönüştürme', 'type casting'],
+    ['yapıcı', 'constructor', 'kurucu', 'yapıcı metot'],
+    ['derleme', 'compile', 'compile-time', 'derleme zamanı', 'derleme zamanı (compile-time)'],
+    ['çalışma', 'runtime', 'çalışma zamanı', 'run-time'],
+    ['kontrollü', 'checked', 'denetlenen'],
+    ['kontrolsüz', 'unchecked', 'denetlenmeyen'],
+    ['çöp toplama', 'garbage collection', 'çöp toplayıcı', 'garbage collector', 'gc'],
+    ['örnek', 'örneği', 'instance'],
+    ['boolean', 'mantıksal', 'true/false'],
+    ['geçersiz kılınamaz', 'override edilemez', 'ezilemez'],
+    ['public', 'genel'],
+    ['private', 'özel'],
+    ['protected', 'korumalı']
+  ].map((g) => g.map((t) => normAns(t).toLocaleLowerCase('tr')));
+  const synExpand = (acc) => {
+    const out = new Set(acc.map((a) => normAns(a).toLocaleLowerCase('tr')));
+    SYN.forEach((g) => { if (g.some((t) => out.has(t))) g.forEach((t) => out.add(t)); });
+    return out;
+  };
+  // İskelet bloklarında esnek karşılaştırma: boşluk, @Override ve sondaki ; önemsiz
+  const normCode = (s) => String(s).replace(/@Override/g, '').replace(/[“”]/g, '"').replace(/\s+/g, '').replace(/;+$/, '');
+
+  // Renklendirici sayıları ayrı işaretlediği için ⟦n⟧ boşlukları önce ayrılır, kod parçaları ayrı renklendirilir
+  const hlBlanks = (src) => String(src).replace(/^\n+|\s+$/g, '').split(/⟦(\d+)⟧/)
+    .map((p, i) => (i % 2 === 0 ? OOPLab.java.highlight(p) : `⟦${p}⟧`)).join('');
+
   function checkInner(c, id, st) {
     const q = c.q;
     if (c.type === 'mc') {
@@ -141,7 +180,7 @@
       // prose: kavram cümlesi (hocanın klasik boşluk doldurması); değilse kod
       const body = c.prose
         ? `<p class="fill-prose">${String(c.text).replace(/⟦(\d+)⟧/g, blank)}</p>`
-        : `<pre class="l-code jcode">${OOPLab.java.highlight(String(c.code).replace(/^\n+|\s+$/g, '')).replace(/⟦(\d+)⟧/g, blank)}</pre>`;
+        : `<pre class="l-code jcode">${hlBlanks(c.code).replace(/⟦(\d+)⟧/g, blank)}</pre>`;
       return `<div class="fx-check${st ? ' ' + st : ''}" data-check="${id}">
         <p class="fx-check-q"><span class="fill-tag">${c.prose ? 'Kavram boşluğu' : 'Boşluk doldur'}</span> ${q}</p>
         ${body}
@@ -149,17 +188,53 @@
         <div class="l-check-a" hidden><p class="mc-verdict"></p><p>${c.a || ''}</p></div>
       </div>`;
     }
+    if (c.type === 'bug') {
+      // Hata avcısı: satırlara tıklayarak hatalı satırları seç, sonra kontrol et
+      const lines = String(c.code).replace(/^\n+|\s+$/g, '').split('\n');
+      return `<div class="fx-check bug${st ? ' ' + st : ''}" data-check="${id}">
+        <p class="fx-check-q"><span class="fill-tag bug-tag">Hatayı bul</span> ${q}</p>
+        <p class="bug-hint">Hatalı olduğunu düşündüğün satırlara tıkla (birden çok olabilir), sonra <b>Kontrol et</b>.</p>
+        <div class="bug-code">${lines.map((ln, i) => `<button type="button" class="bug-ln" data-act="bugline" data-n="${i + 1}"><span class="bug-no">${i + 1}</span><code>${OOPLab.java.highlight(ln) || ' '}</code></button>`).join('')}</div>
+        <div class="btn-row"><button class="btn btn-primary btn-sm" type="button" data-act="bugcheck">Kontrol et</button><button class="btn btn-sm btn-ghost" type="button" data-act="bugshow">Hataları göster</button></div>
+        <div class="l-check-a" hidden>
+          <p class="mc-verdict"></p>
+          <ul class="bug-list">${c.explain.map((e) => `<li><b>Satır ${e.line}</b> <span class="bug-kind ${e.kind === 'Derleme' ? 'ce' : e.kind === 'Not' ? 'nt' : 're'}">${e.kind === 'Not' ? 'not' : `${e.kind} hatası`}</span> ${e.text}</li>`).join('')}</ul>
+          ${c.fixed ? `<p class="wr-given">Düzeltilmiş kod:</p>${javaLines(c.fixed)}` : ''}
+          ${c.output ? `<p class="wr-given">Düzeltilmiş kodun çıktısı:</p><pre class="l-code wr-out">${esc(c.output)}</pre>` : ''}
+          ${c.a ? `<p>${c.a}</p>` : ''}
+        </div>
+      </div>`;
+    }
+    if (c.type === 'skeleton') {
+      // Hocanın [B1]…[Bn] iskeleti: her blok ayrı yazılır, model cevapla karşılaştırılır
+      const code = hlBlanks(c.code).replace(/⟦(\d+)⟧/g, (_, d) => {
+        const b = c.blanks[Number(d)];
+        const rows = Math.max(1, b.model.split('\n').length);
+        return `<span class="sk-blk" data-b="${d}"><span class="sk-lbl">[B${Number(d) + 1}]</span><textarea class="sk-in" rows="${rows}" spellcheck="false" autocomplete="off" aria-label="Blok B${Number(d) + 1}" placeholder="${esc(b.hint || '')}">${esc(Store.data.drafts[`${id}@${d}`] || '')}</textarea><span class="sk-model" hidden></span></span>`;
+      });
+      return `<div class="fx-check sk${st ? ' ' + st : ''}" data-check="${id}">
+        <p class="fx-check-q"><span class="fill-tag sk-tag">İskeleti tamamla</span> ${q}</p>
+        ${c.req ? `<div class="sk-req"><b>İstenilenler:</b><ul>${c.req.map((r) => `<li>${r}</li>`).join('')}</ul></div>` : ''}
+        <pre class="l-code jcode sk-code">${code}</pre>
+        <div class="btn-row"><button class="btn btn-primary btn-sm" type="button" data-act="skcheck">Kontrol et</button><button class="btn btn-sm btn-ghost" type="button" data-act="skshow">Model cevapları göster</button></div>
+        <div class="l-check-a" hidden>
+          <p class="mc-verdict"></p>
+          ${c.output ? `<p class="wr-given">Tamamlanmış programın çıktısı:</p><pre class="l-code wr-out">${esc(c.output)}</pre>` : ''}
+          ${c.a ? `<p>${c.a}</p>` : ''}
+        </div>
+      </div>`;
+    }
     if (c.type === 'write') {
       // Arka sayfa problemi: önce kendin yaz, sonra model çözüm + puanlama listesiyle karşılaştır
       return `<div class="fx-check wr${st ? ' ' + st : ''}" data-check="${id}">
         <p class="fx-check-q"><span class="fill-tag wr-tag">Kodu yaz</span> ${q}</p>
         ${c.given ? `<p class="wr-given">Verilen:</p>${javaLines(c.given)}` : ''}
-        <textarea class="wr-draft" rows="9" spellcheck="false" placeholder="Kodunu kâğıda yazar gibi buraya yaz… (kaydedilir)">${esc(Store.data.drafts[id] || '')}</textarea>
-        <button class="btn btn-primary btn-sm" type="button" data-act="reveal">Model çözümü göster</button>
+        <textarea class="wr-draft" rows="${c.solution ? 9 : 5}" spellcheck="false" placeholder="${c.solution ? 'Kodunu kâğıda yazar gibi buraya yaz… (kaydedilir)' : 'Çıktıyı satır satır buraya yaz… (kaydedilir)'}">${esc(Store.data.drafts[id] || '')}</textarea>
+        <button class="btn btn-primary btn-sm" type="button" data-act="reveal">${c.solution ? 'Model çözümü göster' : 'Doğru çıktıyı göster'}</button>
         <div class="l-check-a" hidden>
           ${c.rubric ? `<div class="wr-rubric"><b>Hoca neye bakar? Kendi kodunda işaretle:</b><ul>${c.rubric.map((r) => `<li><label><input type="checkbox"> ${r}</label></li>`).join('')}</ul></div>` : ''}
-          ${javaLines(c.solution)}
-          ${c.output ? `<p class="wr-given">Çıktı:</p><pre class="l-code">${esc(c.output)}</pre>` : ''}
+          ${c.solution ? javaLines(c.solution) : ''}
+          ${c.output ? `<p class="wr-given">${c.solution ? 'Çıktı' : 'Doğru çıktı'}:</p><pre class="l-code wr-out">${esc(c.output)}</pre>` : ''}
           ${c.a ? `<p>${c.a}</p>` : ''}
           <div class="btn-row"><button class="btn btn-sm l-ok" type="button" data-act="ok">✓ Doğru yazdım</button><button class="btn btn-sm l-bad" type="button" data-act="bad">✗ Eksik / yanlış</button></div>
         </div>
@@ -282,7 +357,7 @@
       ['5–6', 'Kalıtım ve Çok Biçimlilik', 'ch2', 'dispatch'],
       ['7', 'İstisna Yönetimi ve Metin I/O', 'ch3', 'exceptions'],
       ['8', 'Ara Sınav', 'ch5', null],
-      ['9', 'Soyut Sınıflar ve Arayüzler (erken bakış)', 'ch4', null],
+      ['9', 'Soyut Sınıflar ve Arayüzler (vizede soruluyor)', 'ch4', null],
       ['10', 'Olaya Dayalı Programlama', null, null],
       ['11', 'Kullanıcı Arayüzleri Oluşturma', null, null],
       ['12', 'Özyineli (Recursive) Fonksiyonlar', null, null],
@@ -330,7 +405,7 @@
       <div class="card"><div class="table-wrap"><table class="l-plan"><thead><tr><th>Hafta</th><th>Konu</th><th>Bu sitede</th></tr></thead><tbody>
         ${plan.map(([w, t, ch, lab]) => `<tr><td class="num">${w}</td><td>${t}</td><td>${ch ? `<a class="pill ok" href="#/learn/${ch}">Ders notu ✓</a>` : ''}${lab ? `<a class="pill lab" href="#/${lab}">Laboratuvar</a>` : ''}${!ch && !lab ? '<span class="muted">PDF gelince eklenecek</span>' : ''}</td></tr>`).join('')}
       </tbody></table></div>
-      <p class="hint">Ders planı Slide01 s.2'den. Bölüm 4 (soyut sınıflar ve arayüzler) vizeden sonraki ilk konudur; burada erken bakış olarak yer alır. 10–15. haftaların PDF'leri gelince eklenecek.</p></div>`;
+      <p class="hint">Ders planı Slide01 s.2'den. Bölüm 4 (soyut sınıflar ve arayüzler) planda 9. haftada görünse de 2022, 2024 ve 2025 vizelerinin üçünde de soruldu; vize konusu olarak çalış. 10–15. haftaların PDF'leri gelince eklenecek.</p></div>`;
   }
 
   function pageChapter(ch) {
@@ -600,7 +675,7 @@
         <h2 class="fx-title">${l.title}</h2>
         <p class="fx-sub">${l.en} · ${lessonSource(l)} · ~${l.minutes} dk</p>
         ${questionsFor(key).length ? `<p class="tq-lesson">★ Bu derste <b>${questionsFor(key).length} sınav sorusu</b> var. İlgili kartlarda sarı uyarı kutusu çıkar.</p>` : ''}
-        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.prose ? `<p>${String(pre.text).replace(/⟦\d+⟧/g, '____')}</p>` : ''}${pre.code ? javaLines(pre.type === 'fill' ? pre.code.replace(/⟦\d+⟧/g, '____') : pre.code) : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
+        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.prose ? `<p>${String(pre.text).replace(/⟦\d+⟧/g, '____')}</p>` : ''}${pre.code && (pre.type === 'mc' || pre.type === 'fill') ? javaLines(pre.type === 'fill' ? pre.code.replace(/⟦\d+⟧/g, '____') : pre.code) : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
     } else if (card.kind === 'check') {
       const c = card.check;
       const id = `${key}#${card.n}`;
@@ -940,14 +1015,64 @@
       } else if (a === 'retry') {
         chk.querySelectorAll('.mc-opt').forEach((o) => { o.disabled = false; o.classList.remove('right', 'wrong'); });
         ans.hidden = true;
+      } else if (a === 'bugline') {
+        if (!chk.classList.contains('bug-done')) act.classList.toggle('pick');
+      } else if (a === 'bugcheck' || a === 'bugshow') {
+        const c = findCheck(id);
+        const bugs = new Set(c.bugs);
+        let all = true;
+        chk.querySelectorAll('.bug-ln').forEach((ln) => {
+          const n = Number(ln.dataset.n);
+          const picked = a === 'bugcheck' && ln.classList.contains('pick');
+          ln.classList.remove('hit', 'wrong', 'missed');
+          if (bugs.has(n)) ln.classList.add(picked ? 'hit' : 'missed');
+          else if (picked) ln.classList.add('wrong');
+          if (bugs.has(n) !== picked) all = false;
+        });
+        chk.classList.add('bug-done');
+        const found = chk.querySelectorAll('.bug-ln.hit').length;
+        verdict.innerHTML = a === 'bugshow' ? '<b class="v-bad">Hatalı satırlar işaretlendi.</b>'
+          : all ? '<b class="v-ok">✓ Tüm hataları buldun!</b>'
+          : `<b class="v-bad">✗ ${found} / ${bugs.size} hata bulundu${chk.querySelectorAll('.bug-ln.wrong').length ? ', hatasız satır da seçtin (kırmızı)' : ''}.</b> Turuncu satırlar kaçırdıkların.`;
+        ans.hidden = false;
+        markCheck(chk, id, a === 'bugcheck' && all ? 'ok' : 'bad');
+      } else if (a === 'skcheck' || a === 'skshow') {
+        const c = findCheck(id);
+        chk.querySelectorAll('.sk-blk').forEach((blk) => {
+          const b = c.blanks[Number(blk.dataset.b)];
+          const inp = blk.querySelector('.sk-in');
+          const ok = a === 'skcheck' && [b.model, ...(b.answers || [])].some((x) => normCode(x) === normCode(inp.value));
+          blk.classList.toggle('ok', ok);
+          blk.classList.toggle('ko', !ok);
+          const m = blk.querySelector('.sk-model');
+          m.hidden = ok;
+          if (!ok) m.innerHTML = `<span class="sk-mlbl">Model cevap:</span>${javaLines(b.model)}${b.note ? `<small>${b.note}</small>` : ''}${a === 'skcheck' && inp.value.trim() ? '<button class="btn btn-sm btn-ghost" type="button" data-act="sksame">✓ Benimki de aynı anlamda</button>' : ''}`;
+        });
+        const total = c.blanks.length;
+        const okN = chk.querySelectorAll('.sk-blk.ok').length;
+        verdict.innerHTML = a === 'skshow' ? '<b class="v-bad">Model cevaplar blokların altında.</b>'
+          : okN === total ? '<b class="v-ok">✓ Tüm bloklar doğru!</b>'
+          : `<b class="v-bad">${okN} / ${total} blok birebir eşleşti.</b> Eşleşmeyenlerin altındaki model cevapla karşılaştır; farklı yazıp aynı işi yapıyorsa "aynı anlamda" de.`;
+        ans.hidden = false;
+        markCheck(chk, id, okN === total && a === 'skcheck' ? 'ok' : 'bad');
+      } else if (a === 'sksame') {
+        const blk = act.closest('.sk-blk');
+        blk.classList.remove('ko');
+        blk.classList.add('ok');
+        blk.querySelector('.sk-model').hidden = true;
+        const okN = chk.querySelectorAll('.sk-blk.ok').length;
+        const total = chk.querySelectorAll('.sk-blk').length;
+        verdict.innerHTML = okN === total ? '<b class="v-ok">✓ Tüm bloklar tamam!</b>' : `<b class="v-bad">${okN} / ${total} blok tamam.</b>`;
+        if (okN === total) markCheck(chk, id, 'ok');
       } else if (a === 'fill' || a === 'fillshow') {
         const c = findCheck(id);
         let all = true;
         chk.querySelectorAll('.fill-in').forEach((inp) => {
           const acc = c.answers[Number(inp.dataset.b)];
           if (a === 'fillshow') inp.value = acc[0];
-          const n = (s) => (c.prose ? normAns(s).toLocaleLowerCase('tr') : normAns(s));
-          const ok = acc.some((x) => n(x) === n(inp.value));
+          const ok = c.prose
+            ? synExpand(acc).has(normAns(inp.value).toLocaleLowerCase('tr'))
+            : acc.some((x) => normAns(x) === normAns(inp.value));
           inp.classList.toggle('ok', ok);
           inp.classList.toggle('ko', !ok);
           all = all && ok;
@@ -992,10 +1117,28 @@
     }
   }
 
+  // Kod kutularında Tab girinti ekler (odak kaybolmaz)
+  function onCodeTab(e) {
+    const ta = e.target;
+    if (e.key !== 'Tab' || e.shiftKey || !ta.matches || !ta.matches('.wr-draft, .sk-in')) return;
+    e.preventDefault();
+    const s = ta.selectionStart;
+    ta.setRangeText('    ', s, ta.selectionEnd, 'end');
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   function onInput(e) {
     const wr = e.target.closest('.wr-draft');
     if (wr) {
       Store.data.drafts[wr.closest('[data-check]').dataset.check] = wr.value;
+      Store.save();
+      return;
+    }
+    const sk = e.target.closest('.sk-in');
+    if (sk) {
+      Store.data.drafts[`${sk.closest('[data-check]').dataset.check}@${sk.closest('.sk-blk').dataset.b}`] = sk.value;
+      // blok yazdıkça büyüsün
+      sk.rows = Math.max(sk.rows, sk.value.split('\n').length);
       Store.save();
       return;
     }
@@ -1070,6 +1213,7 @@
     root.addEventListener('click', onClick);
     root.addEventListener('input', onInput);
     root.addEventListener('change', onInput);
+    root.addEventListener('keydown', onCodeTab);
     document.addEventListener('keydown', onKey);
     navigate(p);
   }
@@ -1079,6 +1223,7 @@
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
       root.removeEventListener('change', onInput);
+      root.removeEventListener('keydown', onCodeTab);
     }
     document.removeEventListener('keydown', onKey);
     document.body.classList.remove('focus-mode');

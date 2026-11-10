@@ -71,24 +71,29 @@
       concepts: ['Throwable', 'Error', 'Exception', 'RuntimeException', 'checked / unchecked', 'throw', 'throws', 'try-catch', 'catch sırası', 'çağrı yığını', 'yakala ya da bildir', 'getMessage / toString', 'finally', 'rethrow', 'chained exception', 'özel istisna', 'File', 'PrintWriter', 'try-with-resources', 'Scanner(File)']
     },
     ch4: {
-      slide: 'Liang Bölüm 13 (Hafta 9)',
+      slide: 'Liang Bölüm 13 · 2022, 2024, 2025 vizeleri',
       topics: [
-        ['Soyut sınıflar ve soyut metotlar', ['abstract-sinif']],
-        ['Arayüzler', ['interface']],
-        ['Soyut sınıf mı arayüz mü? Comparable', ['soyut-vs-arayuz']]
+        ['Soyut sınıflar ve soyut metotlar', ['abstract-sinif', 'soyut-kurallar']],
+        ['Arayüzler ve kuralları', ['interface', 'arayuz-kurallar']],
+        ['Soyut sınıf mı arayüz mü?', ['soyut-vs-arayuz']],
+        ['Comparable ve compareTo', ['comparable']],
+        ['Cloneable ve clone()', ['cloneable']]
       ],
-      concepts: ['abstract class', 'abstract method', 'interface', 'implements', 'public static final sabitler', 'çoklu arayüz', 'Comparable', 'compareTo']
+      concepts: ['abstract class', 'abstract method', 'soyut sınıfın yapıcısı', 'interface', 'implements', 'extends + implements sırası', 'public static final sabitler', 'imza çakışması', 'çoklu arayüz', 'Comparable', 'compareTo', 'Cloneable', 'marker interface', 'clone()', 'sığ / derin kopya']
     },
     ch5: {
-      slide: 'Hafta 8 · Ara Sınav (hocanın soru formatı)',
+      slide: 'Hafta 8 · 2022, 2024, 2025 vizeleri',
       topics: [
-        ['Sınav türü 1: kavram boşlukları', ['kavram-bosluk']],
-        ['Sınav türü 2: kodu tamamlama', ['kod-tamamla']],
-        ['Sınav türü 3: kodu anlama (karma kod izleme)', ['karma-iz']],
-        ['Sınav türü 4: arka sayfa problemleri', ['arka-sayfa']],
-        ['Deneme sınavı (16 soru)', ['deneme-sinavi']]
+        ['Hocanın vize şablonu', ['gecmis-vizeler']],
+        ['S1 · Kavram boşlukları', ['gercek-bosluk', 'kavram-bosluk']],
+        ['S2 · Doğru / Yanlış', ['dogru-yanlis']],
+        ['Kodu tamamla', ['kod-tamamla']],
+        ['S3 · Kod çıktısı', ['cikti-sorulari', 'karma-iz']],
+        ['S4 · Hata bulma ve düzeltme', ['hata-bulma']],
+        ['S5 · 40p iskelet / tasarım', ['iskelet', 'arka-sayfa']],
+        ['Deneme ve 80 dk simülasyon', ['deneme-sinavi', 'vize-simulasyonu']]
       ],
-      concepts: ['yapıcı zinciri + static', 'override + super.metot()', 'dinamik bağlama', 'throw / catch / finally', 'toString otomatik çağrısı']
+      concepts: ['yapıcı zinciri (this / super)', 'override + super.metot()', 'overload seçimi', 'iç içe try-catch-finally', 'komut satırı argümanları', 'interface sabiti final', 'iş kuralı + instanceof', 'read-only alan', 'Comparable', 'özel istisna']
     }
   };
 })(window.OOPLab = window.OOPLab || {});

@@ -16,7 +16,7 @@ Hocanın PDF'leri (Liang, *Introduction to Java Programming*) slayt sırasıyla 
 | 1 · Sınıflar ve Nesneler | Slide01_BPII.pdf | Nesne/sınıf, UML, yapıcılar, referanslar, null, GC, Date/Random, static, görünürlük, kapsülleme, pass-by-value, immutable, kapsam, this, nesne dizileri, ArrayList, wrapper |
 | 2 · Kalıtım ve Çok Biçimlilik | Slide02_BPII.pdf | extends, super, yapıcı zinciri, Apple/Fruit hatası, override, override vs overload, Object/toString, polimorfizm, eşleştirme vs bağlama, casting, equals, protected, final |
 | 3 · İstisnalar ve Metin I/O | Slide03_BPII.pdf | Motivasyon, avantajlar, hiyerarşi, checked/unchecked, throw/throws/catch, çoklu catch, yayılım, finally, rethrow, özel istisna, File, PrintWriter, try-with-resources, Scanner, ReplaceText, web'den okuma |
-| 4 · Soyut Sınıf ve Arayüz | Liang Bölüm 13 | Vize sonrası konu, erken bakış |
+| 4 · Soyut Sınıf ve Arayüz | Liang Bölüm 13 | Vize konusu (geçmiş vizelerin hepsinde çıktı) |
 | 5 · Vize Provası | — | Karma kod izleme ve 16 soruluk deneme |
 
 Her ders aynı döngüyü izler:
