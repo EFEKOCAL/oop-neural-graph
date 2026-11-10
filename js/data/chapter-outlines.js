@@ -94,6 +94,17 @@
         ['Deneme ve 80 dk simülasyon', ['deneme-sinavi', 'vize-simulasyonu']]
       ],
       concepts: ['yapıcı zinciri (this / super)', 'override + super.metot()', 'overload seçimi', 'iç içe try-catch-finally', 'komut satırı argümanları', 'interface sabiti final', 'iş kuralı + instanceof', 'read-only alan', 'Comparable', 'özel istisna']
+    },
+    ch6: {
+      slide: 'Hocanın şablonuyla yeni sınavlar',
+      topics: [
+        ['Deneme 1 · Hastane (2025 formatı)', ['deneme-1']],
+        ['Deneme 2 · E-ticaret Ödeme (2024 formatı)', ['deneme-2']],
+        ['Deneme 3 · Lojistik Filo (2022 formatı)', ['deneme-3']],
+        ['Deneme 4 · IoT Sensör Ağı (2025 formatı)', ['deneme-4']],
+        ['Deneme 5 · Konferans Kayıt (karma)', ['deneme-5']]
+      ],
+      concepts: ['pass-by-value', 'Integer önbelleği', 'overload seçimi (bildirilen tip)', 'yapıcıdan override metot çağrısı', 'Cloneable / sığ kopya', 'catch içinde yeniden fırlatma', 'ArrayList remove(int) / remove(Object)', 'equals override', 'dosya I/O', 'iş kuralları']
     }
   };
 })(window.OOPLab = window.OOPLab || {});
