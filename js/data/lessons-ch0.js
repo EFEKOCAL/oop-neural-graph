@@ -275,6 +275,11 @@
             "html": "<code>nextInt()</code> sayıyı okur ama kullanıcının bastığı <b>Enter (satır sonu)</b> karakterini tamponda bırakır. Arkasından gelen <code>nextLine()</code> bu boş satırı görür ve hemen boş String döndürür. Çözüm: araya fazladan bir <code>nextLine()</code> koyup satır sonunu \"yutmak\"."
           },
           {
+            "t": "note",
+            "kind": "exam",
+            "html": "Lab slaytındaki tam liste: <code>nextInt()</code>, <code>nextDouble()</code>, <code>next()</code>, <code>nextLine()</code> ve ayrıca <code>nextLong()</code>, <code>nextShort()</code>, <code>nextFloat()</code>, <code>nextBoolean()</code>, <code>hasNext()</code>. Lab uyarısı: <code>next()</code> ile okuyorsan sonucu tutan değişken <code>int</code> değil <code>String</code> olmalı."
+          },
+          {
             "t": "br"
           },
           {
@@ -549,6 +554,124 @@
               ]
             ],
             "a": "Dizilerde <code>length</code> bir alandır, parantez yoktur."
+          }
+        ]
+      },
+      {
+        "id": "lab-hafta1",
+        "title": "Lab Hafta 1: uygulamalar ve ödev (çözümlü)",
+        "en": "Lab Week 1 Exercises",
+        "src": "Lab Hafta 1 · s.6, 13–21",
+        "minutes": 10,
+        "blocks": [
+          {
+            "t": "p",
+            "html": "Lab dersinde verilen uygulamaların ve Ödev 1'in çözümleri. Önce kendin yazmayı dene, sonra karşılaştır. Hepsi aynı birkaç kalıba dayanır: <b>% 10 ile son rakamı al</b>, <b>/ 10 ile son rakamı at</b>, döngüyle biriktir."
+          },
+          {
+            "t": "table",
+            "head": [
+              "Görev",
+              "Anahtar fikir"
+            ],
+            "rows": [
+              [
+                "Dairenin alanı",
+                "<code>Math.PI * r * r</code>; yarıçapı <code>nextDouble()</code> ile oku"
+              ],
+              [
+                "Son rakam",
+                "<code>sayi % 10</code> (negatifse <code>Math.abs</code>)"
+              ],
+              [
+                "Sayıyı ters çevirme",
+                "Döngü: <code>ters = ters * 10 + n % 10; n /= 10;</code>"
+              ],
+              [
+                "5 sayının ortalaması",
+                "Döngüde topla, sonra 5'e böl (double toplam, tam sayı bölmesine dikkat)"
+              ],
+              [
+                "Sayı tahmin oyunu",
+                "<code>Random.nextInt(100) + 1</code> + do-while + büyük/küçük ipucu"
+              ],
+              [
+                "1–12 → ay adı",
+                "<code>switch</code>, her case sonunda <code>break</code>"
+              ],
+              [
+                "0'dan 150'ye 3'er",
+                "<code>for (int i = 0; i &lt;= 150; i += 3)</code>"
+              ],
+              [
+                "N faktöriyel",
+                "while ile çarparak biriktir (Bölüm 0 · Karar ve döngü dersinde adım adım)"
+              ],
+              [
+                "Ödev: tek/çift toplam",
+                "<code>i % 2 == 0</code> ise çift"
+              ],
+              [
+                "Ödev: 12345 içinde 7 var mı?",
+                "Rakam rakam <code>% 10</code> ile kontrol, bulunca <code>break</code>"
+              ]
+            ]
+          },
+          {
+            "t": "h",
+            "text": "Kodda gör: sayıyı ters çevirme"
+          },
+          {
+            "t": "dg",
+            "id": "tr-lab1-ters"
+          },
+          {
+            "t": "h",
+            "text": "Kod örneği: tüm çözümler"
+          },
+          {
+            "t": "dg",
+            "id": "tr-lab1"
+          }
+        ],
+        "checks": [
+          {
+            "type": "mc",
+            "q": "1'den 50'ye kadar <b>tek</b> sayıların toplamı kaçtır?",
+            "options": [
+              "600",
+              "625",
+              "650",
+              "1275"
+            ],
+            "answer": 1,
+            "a": "1 + 3 + … + 49: 25 tane tek sayı, toplamı 25² = 625. Çiftlerin toplamı 650, ikisinin toplamı 1275."
+          },
+          {
+            "type": "fill",
+            "q": "Sayıyı ters çeviren döngüyü tamamla:",
+            "code": "int n = 1234, ters = 0;\nwhile (n > 0) {\n    ters = ters * 10 + n ⟦0⟧ 10;\n    n = n ⟦1⟧ 10;\n}",
+            "answers": [
+              [
+                "%"
+              ],
+              [
+                "/"
+              ]
+            ],
+            "a": "<code>n % 10</code> son rakamı verir, <code>n / 10</code> son rakamı atar (tam sayı bölmesi)."
+          },
+          {
+            "type": "mc",
+            "q": "<code>new Random().nextInt(100) + 1</code> hangi aralıkta sayı üretir?",
+            "options": [
+              "0–99",
+              "0–100",
+              "1–100",
+              "1–101"
+            ],
+            "answer": 2,
+            "a": "nextInt(100) → 0..99, +1 ile 1..100."
           }
         ]
       }
@@ -1001,5 +1124,124 @@
         "out": "!!Exception in thread \"main\" java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3"
       }
     ]
+  });
+
+  T("tr-lab1-ters", {
+    "files": [
+      {
+        "name": "TersCevir.java",
+        "code": "\npublic class TersCevir {\n    public static void main(String[] args) {\n        int n = 1234, ters = 0;\n        while (n > 0) {\n            int rakam = n % 10;      // son rakam\n            ters = ters * 10 + rakam;\n            n = n / 10;              // son rakamı at\n        }\n        System.out.println(ters);\n    }\n}"
+      }
+    ],
+    "steps": [
+      {
+        "lines": [
+          3
+        ],
+        "note": "Başlangıç.",
+        "vars": {
+          "n": "1234",
+          "ters": "0"
+        }
+      },
+      {
+        "lines": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "note": "1234 % 10 = <b>4</b> → ters = 0·10 + 4 = 4; n = 1234 / 10 = 123",
+        "vars": {
+          "n": "123",
+          "ters": "4",
+          "rakam": "4"
+        }
+      },
+      {
+        "lines": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "note": "123 % 10 = <b>3</b> → ters = 4·10 + 3 = 43; n = 12",
+        "vars": {
+          "n": "12",
+          "ters": "43",
+          "rakam": "3"
+        }
+      },
+      {
+        "lines": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "note": "12 % 10 = <b>2</b> → ters = 432; n = 1",
+        "vars": {
+          "n": "1",
+          "ters": "432",
+          "rakam": "2"
+        }
+      },
+      {
+        "lines": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "note": "1 % 10 = <b>1</b> → ters = 4321; n = 1 / 10 = 0",
+        "vars": {
+          "n": "0",
+          "ters": "4321",
+          "rakam": "1"
+        }
+      },
+      {
+        "lines": [
+          4
+        ],
+        "note": "0 > 0 yanlış → döngü biter.",
+        "vars": {
+          "n": "0",
+          "ters": "4321"
+        }
+      },
+      {
+        "lines": [
+          9
+        ],
+        "out": "4321"
+      }
+    ]
+  });
+
+  T("tr-lab1", {
+    "files": [
+      {
+        "name": "IlkUygulamalar.java",
+        "code": "\nimport java.util.Scanner;\n\npublic class IlkUygulamalar {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n\n        // 1) Dairenin alanı\n        System.out.print(\"Yarıçap: \");\n        double r = sc.nextDouble();\n        double alan = Math.PI * r * r;\n        System.out.println(\"Alan: \" + Math.round(alan * 100) / 100.0);\n\n        // 2) Girilen sayının son rakamı\n        System.out.print(\"Sayı: \");\n        int sayi = sc.nextInt();\n        System.out.println(\"Son rakam: \" + Math.abs(sayi % 10));\n\n        // 3) Sayıyı ters çevirme\n        int n = Math.abs(sayi), ters = 0;\n        while (n > 0) {\n            ters = ters * 10 + n % 10;\n            n /= 10;\n        }\n        System.out.println(\"Tersi: \" + ters);\n\n        // 4) 5 sayının ortalaması\n        double toplam = 0;\n        for (int i = 1; i <= 5; i++) {\n            System.out.print(i + \". sayı: \");\n            toplam += sc.nextDouble();\n        }\n        System.out.println(\"Ortalama: \" + toplam / 5);\n    }\n}"
+      },
+      {
+        "name": "SayiTahmin.java",
+        "code": "\nimport java.util.Random;\nimport java.util.Scanner;\n\npublic class SayiTahmin {\n    public static void main(String[] args) {\n        Random rnd = new Random();\n        int hedef = rnd.nextInt(100) + 1;          // 1..100\n        Scanner sc = new Scanner(System.in);\n        int tahmin, deneme = 0;\n        do {\n            System.out.print(\"Tahmin (1-100): \");\n            tahmin = sc.nextInt();\n            deneme++;\n            if (tahmin < hedef)\n                System.out.println(\"Daha büyük bir sayı söyle.\");\n            else if (tahmin > hedef)\n                System.out.println(\"Daha küçük bir sayı söyle.\");\n        } while (tahmin != hedef);\n        System.out.println(deneme + \". denemede bildin!\");\n    }\n}"
+      },
+      {
+        "name": "Aylar.java",
+        "code": "\npublic class Aylar {\n    public static void main(String[] args) {\n        int ay = 4;\n        switch (ay) {\n            case 1:  System.out.println(\"Ocak\");    break;\n            case 2:  System.out.println(\"Şubat\");   break;\n            case 3:  System.out.println(\"Mart\");    break;\n            case 4:  System.out.println(\"Nisan\");   break;\n            case 5:  System.out.println(\"Mayıs\");   break;\n            case 6:  System.out.println(\"Haziran\"); break;\n            case 7:  System.out.println(\"Temmuz\");  break;\n            case 8:  System.out.println(\"Ağustos\"); break;\n            case 9:  System.out.println(\"Eylül\");   break;\n            case 10: System.out.println(\"Ekim\");    break;\n            case 11: System.out.println(\"Kasım\");   break;\n            case 12: System.out.println(\"Aralık\");  break;\n            default: System.out.println(\"Geçersiz ay\");\n        }\n    }\n}"
+      },
+      {
+        "name": "Ucer.java",
+        "code": "\npublic class Ucer {\n    public static void main(String[] args) {\n        for (int i = 0; i <= 150; i += 3)\n            System.out.print(i + \" \");\n        System.out.println();\n    }\n}"
+      },
+      {
+        "name": "Odev1.java",
+        "code": "\npublic class Odev1 {\n    public static void main(String[] args) {\n        int tek = 0, cift = 0;\n        for (int i = 1; i <= 50; i++) {\n            if (i % 2 == 0) cift += i;\n            else tek += i;\n        }\n        System.out.println(\"1'den 50'ye kadar tek sayıların toplamı: \" + tek);\n        System.out.println(\"1'den 50'ye kadar çift sayıların toplamı: \" + cift);\n\n        int sayi = 12345, n = sayi;\n        boolean var = false;\n        while (n > 0) {\n            if (n % 10 == 7) { var = true; break; }\n            n /= 10;\n        }\n        System.out.println(sayi + (var ? \" içinde 7 var\" : \" içinde 7 yok\"));\n    }\n}"
+      }
+    ],
+    "output": "--- IlkUygulamalar (girdi: 2, 1234, 10 20 30 40 55) ---\nYarıçap: 2\nAlan: 12.57\nSayı: 1234\nSon rakam: 4\nTersi: 4321\n1. sayı: 10  …  5. sayı: 55\nOrtalama: 31.0\n--- SayiTahmin (örnek: hedef 37) ---\nTahmin (1-100): 50\nDaha küçük bir sayı söyle.\nTahmin (1-100): 25\nDaha büyük bir sayı söyle.\nTahmin (1-100): 37\n3. denemede bildin!\n--- Aylar ---\nNisan\n--- Ucer ---\n0 3 6 9 12 … 144 147 150\n--- Odev1 ---\n1'den 50'ye kadar tek sayıların toplamı: 625\n1'den 50'ye kadar çift sayıların toplamı: 650\n12345 içinde 7 yok"
   });
 })(window.OOPLab = window.OOPLab || {});

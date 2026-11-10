@@ -203,6 +203,74 @@
         ]
       },
       {
+        "id": "tv-ornegi",
+        "title": "Örnekler: TestCircle1 ve TV sınıfı",
+        "en": "Examples: TestCircle1 and the TV Class",
+        "src": "Slide01 · s.12–13",
+        "minutes": 6,
+        "blocks": [
+          {
+            "t": "p",
+            "html": "Slayttaki iki \"Run\" örneği. Amaçları aynı: <b>nesne oluşturmak, verilere erişmek ve metotları kullanmak</b>."
+          },
+          {
+            "t": "list",
+            "items": [
+              "<b>TestCircle1</b>: <code>Circle1</code> sınıfının iki yapıcısı var. <code>new Circle1(5.0)</code> ve <code>new Circle1()</code> iki <b>bağımsız</b> nesne üretir; <code>yourCircle.radius = 100</code> yalnızca o nesneyi değiştirir.",
+              "<b>TV</b>: Bir televizyonun durumu (<code>channel</code>, <code>volumeLevel</code>, <code>on</code>) ve davranışları (<code>turnOn</code>, <code>setChannel</code>, <code>channelUp</code>, …). Metotlar kural içerir: TV kapalıyken (<code>on == false</code>) kanal ve ses <b>değişmez</b>; kanal 1–120, ses 1–7 aralığında kalır."
+            ]
+          },
+          {
+            "t": "note",
+            "kind": "why",
+            "html": "TV örneği, nesnenin <b>durumu ile davranışının birlikte</b> tasarlandığını gösterir: setChannel her çağrıldığında önce <code>on</code> durumuna bakar. Aynı sınıftan iki TV nesnesinin durumları birbirinden bağımsızdır."
+          },
+          {
+            "t": "h",
+            "text": "Kod örneği: TestCircle1"
+          },
+          {
+            "t": "dg",
+            "id": "tr-testcircle1"
+          },
+          {
+            "t": "h",
+            "text": "Kodda gör: TV ve TestTV"
+          },
+          {
+            "t": "dg",
+            "id": "tr-tv"
+          }
+        ],
+        "checks": [
+          {
+            "type": "mc",
+            "q": "Çıktı nedir?",
+            "code": "TV t = new TV();\nt.setChannel(50);\nt.turnOn();\nt.channelUp();\nSystem.out.println(t.channel);",
+            "options": [
+              "51",
+              "50",
+              "2",
+              "1"
+            ],
+            "answer": 2,
+            "a": "TV kapalıyken setChannel(50) yok sayılır (kanal 1 kalır). Açıldıktan sonra channelUp → 2."
+          },
+          {
+            "type": "mc",
+            "q": "tv2 için <code>turnOn()</code> çağrılmasaydı TestTV ikinci satırda ne yazdırırdı?",
+            "options": [
+              "tv2's channel is 3 and volume level is 2",
+              "tv2's channel is 1 and volume level is 1",
+              "Derleme hatası",
+              "NullPointerException"
+            ],
+            "answer": 1,
+            "a": "Tüm değiştirici metotlar <code>on</code> kontrolü yapar; kapalı TV'de channelUp/volumeUp etkisizdir, varsayılan değerler (1, 1) kalır."
+          }
+        ]
+      },
+      {
         "id": "yapici",
         "title": "Yapıcılar (constructors) ve varsayılan yapıcı",
         "en": "Constructors",
@@ -337,6 +405,16 @@
             "t": "note",
             "kind": "why",
             "html": "Neden nesne doğrudan değişkende değil? Nesneler büyük ve değişken boyutlu olabilir; onları <b>heap</b> denen ortak alanda tutup değişkende sadece küçük, sabit boyutlu bir adres saklamak hem hızlı hem esnektir. Bunun sonucu: iki değişken <b>aynı</b> nesneyi gösterebilir (bir sonraki derste)."
+          },
+          {
+            "t": "note",
+            "kind": "extra",
+            "html": "Slayt 25'te yeni nesnenin radius'u önce <b>0.0</b>, slayt 26'da <b>1.0</b> görünür. İkisi de doğrudur: <code>new</code> önce alanları <b>varsayılan değerle</b> (double → 0.0) doldurur, sonra alanın başlangıç değeri (<code>radius = 1.0</code>) atanır, en son yapıcının gövdesi çalışır."
+          },
+          {
+            "t": "note",
+            "kind": "warn",
+            "html": "Slayt 21'deki <code>SCircle yourCircle</code> bir yazım hatasıdır; sonraki slaytlardaki gibi <code>Circle yourCircle</code> olmalı."
           },
           {
             "t": "h",
@@ -883,6 +961,19 @@
             "html": "Erişim kısıtı, sınıfın iç detaylarını değiştirdiğinde dışarıdaki kodun kırılmamasını sağlar. Dışarıya ne kadar az şey açarsan o kadar özgürce değişiklik yapabilirsin. Bu yüzden kural: <b>alanlar private, dışarıya sunulacak metotlar public</b>."
           },
           {
+            "t": "h",
+            "text": "Sınıf düzeyinde erişim (s.49 alt kısım)"
+          },
+          {
+            "t": "p",
+            "html": "Değiştiriciler <b>sınıfın kendisine</b> de uygulanır. Değiştiricisiz (default) bir sınıf yalnızca kendi paketinden görülebilir; başka paketteki bir sınıf onu <b>tip olarak bile kullanamaz</b>."
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "package p1;\nclass C1 { ... }                 // default: sadece p1 içinden\npublic class C2 { can access C1 }\n\npackage p2;\npublic class C3 {\n    cannot access C1;            // C1 default, paket dışı\n    can access C2;               // C2 public\n}"
+          },
+          {
             "t": "br"
           },
           {
@@ -1127,6 +1218,11 @@
             "html": "Kapsülleme duvarı, referans dışarı sızınca delinir: kale kapısını kilitleyip anahtarın kopyasını dağıtmak gibi. Çözüm olarak getter, iç nesnenin bir <b>kopyasını</b> döndürebilir (<code>return new BirthDate(year, month, day);</code>)."
           },
           {
+            "t": "note",
+            "kind": "warn",
+            "html": "Slayt 57'nin başlığı \"<b>Değiştirilebilir</b> Nesneler ve Sınıflar\" diye çevrilmiş; doğrusu \"<b>Değiştirilemez</b> (immutable)\". Aynı slayttaki \"Tüm private veri alanlarına ve mutator'lara sahip olmayan bir sınıf <b>mutlaka değiştirilemezdir</b>\" cümlesi de ters çevrilmiş. Liang'ın orijinali: \"<i>not necessarily immutable</i>\", yani \"<b>mutlaka değişmez değildir</b>\". Hemen ardından gelen Student/BirthDate örneği de bunu gösterir."
+          },
+          {
             "t": "br"
           },
           {
@@ -1365,6 +1461,136 @@
         }
       },
       {
+        "id": "liste-yapilari",
+        "title": "Veri yapıları ve listeler: ArrayList'in içi",
+        "en": "Data Structures and Lists",
+        "src": "Slide01 · s.68–80",
+        "minutes": 7,
+        "blocks": [
+          {
+            "t": "def",
+            "term": "Veri yapısı",
+            "en": "Data structure",
+            "html": "Bir şekilde organize edilmiş veri koleksiyonudur. Yalnızca veriyi <b>depolamakla kalmaz</b>, yapı içindeki veri işleme operasyonlarını (ekleme, silme, arama…) da destekler. Dizi, sıralı düzende tutulan bir veri yapısıdır."
+          },
+          {
+            "t": "p",
+            "html": "Dizi kavramı basit ve kullanımı kolaydır ama <b>iki kısıtı</b> vardır:"
+          },
+          {
+            "t": "list",
+            "ordered": true,
+            "items": [
+              "Oluşturulduktan sonra <b>boyutu değiştirilemez</b>.",
+              "<b>Ekleme, silme, sıralama ve arama</b> için yetersiz destek sağlar."
+            ]
+          },
+          {
+            "t": "h",
+            "text": "Nesne yönelimli veri yapıları"
+          },
+          {
+            "t": "p",
+            "html": "Nesne yönelimli düşüncede veri yapısı, <b>eleman</b> denen başka nesneleri depolayan bir <b>nesnedir</b>. Bu yüzden ona <b>konteyner nesnesi</b> (container object) veya <b>koleksiyon nesnesi</b> (collection object) da denir. Veri yapısı tanımlamak aslında bir <b>sınıf</b> yazmaktır: veriyi alanlarda tutar, ekleme/silme gibi işlemleri metotlarla sunar. Veri yapısı oluşturmak o sınıftan bir <b>örnek</b> oluşturmaktır."
+          },
+          {
+            "t": "p",
+            "html": "<b>Liste</b>, veriyi sırayla tutan popüler bir veri yapısıdır (öğrenciler, odalar, şehirler…). Listedeki ortak işlemler:"
+          },
+          {
+            "t": "list",
+            "items": [
+              "Listeden bir eleman bulup getirmek",
+              "Listeye yeni eleman eklemek",
+              "Listeden bir eleman silmek",
+              "Listenin kaç elemanı olduğunu bulmak",
+              "Bir elemanın listede olup olmadığını bulmak",
+              "Listenin boş olup olmadığını bulmak"
+            ]
+          },
+          {
+            "t": "h",
+            "text": "Listeyi uygulamanın iki yolu"
+          },
+          {
+            "t": "compare",
+            "cols": [
+              {
+                "title": "Dizi tabanlı (ArrayList)",
+                "items": [
+                  "Elemanlar dinamik oluşturulan bir <b>dizide</b> tutulur",
+                  "Kapasite aşılırsa <b>daha büyük (iki katı)</b> yeni dizi oluşturulur, tüm elemanlar kopyalanır",
+                  "İndeksle erişim hızlı; araya ekleme/silmede elemanlar kaydırılır"
+                ]
+              },
+              {
+                "title": "Bağlantılı yapı (linked structure)",
+                "items": [
+                  "<b>Düğümlerden</b> (node) oluşur",
+                  "Her eleman için dinamik olarak bir düğüm oluşturulur",
+                  "Düğümler birbirine bağlanarak liste oluşur (ileride işlenecek: LinkedList)"
+                ]
+              }
+            ]
+          },
+          {
+            "t": "h",
+            "text": "Ekleme ve silmede kaydırma"
+          },
+          {
+            "t": "p",
+            "html": "<b>Ekleme</b> (s.79): i. indekse eleman eklemeden önce <b>i ve sonrasındaki tüm elemanlar bir sağa</b> kaydırılır, size 1 artar. <b>Silme</b> (s.80): i. indeksteki eleman kaldırılınca <b>sonrasındaki tüm elemanlar bir sola</b> kaydırılır, size 1 azalır. Kendin dene (Liang'ın ArrayList animasyonunun benzeri):"
+          },
+          {
+            "t": "dg",
+            "id": "arraylist-anim"
+          },
+          {
+            "t": "note",
+            "kind": "extra",
+            "html": "Hocanın verdiği orijinal animasyon: <a href=\"https://yongdanielliang.github.io/animation/web/ArrayList.html\" target=\"_blank\" rel=\"noopener\">yongdanielliang.github.io/animation/web/ArrayList.html</a>"
+          }
+        ],
+        "checks": [
+          {
+            "type": "mc",
+            "q": "Kapasitesi 4 ve içinde 4 eleman olan dizi tabanlı listeye <code>add(e)</code> yapılınca ne olur?",
+            "options": [
+              "IndexOutOfBoundsException",
+              "Kapasite 5 olur, eleman eklenir",
+              "8 kapasiteli yeni dizi oluşturulur, elemanlar kopyalanır, sonra eklenir",
+              "En eski eleman silinir"
+            ],
+            "answer": 2,
+            "a": "Kapasite aşılınca mevcut boyutun iki katı yeni dizi açılır ve elemanlar kopyalanır (Slide01 s.77)."
+          },
+          {
+            "type": "mc",
+            "q": "[A, B, C, D] listesinde <code>remove(1)</code> sonrası C hangi indekstedir?",
+            "options": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "answer": 1,
+            "a": "B silinir, ondan sonrakiler bir sola kayar: [A, C, D] → C indeks 1."
+          },
+          {
+            "type": "mc",
+            "q": "Nesne yönelimli düşüncede başka nesneleri depolayan bir veri yapısına ne denir?",
+            "options": [
+              "Wrapper nesne",
+              "Konteyner / koleksiyon nesnesi",
+              "Immutable nesne",
+              "Soyut nesne"
+            ],
+            "answer": 1,
+            "a": "Container object veya collection object (s.74)."
+          }
+        ]
+      },
+      {
         "id": "arraylist",
         "title": "ArrayList: büyüyüp küçülebilen liste",
         "en": "The ArrayList Class",
@@ -1441,6 +1667,23 @@
           {
             "t": "p",
             "html": "<b>Ne zaman hangisi?</b> Eleman sayısı belli ve değişmiyorsa dizi; değişkense veya liste metotlarına ihtiyaç varsa ArrayList."
+          },
+          {
+            "t": "h",
+            "text": "Tipsiz ArrayList ve Vector"
+          },
+          {
+            "t": "p",
+            "html": "Slayt 83'teki örnek tip belirtmeden yazılmış: <code>ArrayList al = new ArrayList();</code>. Böyle bir liste her elemanı <code>Object</code> olarak tutar; derleyici uyarı verir (unchecked) ve elemanı geri alırken cast gerekir: <code>String s = (String) al.get(0);</code>. Bugün tipli hali (<code>ArrayList&lt;String&gt;</code>) kullanılır."
+          },
+          {
+            "t": "p",
+            "html": "Slide02 s.43'ün başlığındaki <b>Vector</b>, ArrayList ile aynı işi yapan daha eski bir sınıftır (<code>java.util.Vector</code>). Farkı, metotlarının <b>senkronize</b> (synchronized) olmasıdır: aynı anda birden çok iş parçacığının (thread) erişimine karşı güvenlidir ama bu yüzden daha yavaştır. Tek iş parçacıklı programlarda ArrayList tercih edilir."
+          },
+          {
+            "t": "note",
+            "kind": "exam",
+            "html": "\"Array mi ArrayList mi?\" (s.89): eleman sayısı belli ve değişme ihtimali düşükse <b>dizi</b>; eleman sayısı değişkense veya <b>List arayüzünün ilave metotlarına</b> (add, remove, contains, indexOf…) ihtiyaç varsa <b>ArrayList</b>."
           },
           {
             "t": "br"
@@ -1617,6 +1860,68 @@
             ],
             "answer": 1,
             "a": "Wrapper'lar java.lang'tadır; import gerekmez."
+          }
+        ]
+      },
+      {
+        "id": "lab-hafta3",
+        "title": "Lab Hafta 3: HesapMakinesi ve Okul projeleri",
+        "en": "Lab Week 3 Projects",
+        "src": "Lab Hafta 3 · s.9, 15",
+        "minutes": 8,
+        "blocks": [
+          {
+            "t": "p",
+            "html": "Lab slaytlarındaki iki görevin çözümü. İkisi de bölümün kavramlarını bir arada kullanır: sınıf, nesne, metot, private alan, getter/setter, yapıcı ve ArrayList."
+          },
+          {
+            "t": "list",
+            "ordered": true,
+            "items": [
+              "<b>HesapMakinesi</b>: <code>DortIslem</code> sınıfında toplama, çıkarma, çarpma, bölme yapan <b>iki parametreli</b> metotlar; main içinde 5 ve 12 için çalıştır.",
+              "<b>Okul</b>: <code>OgrenciBilgileri</code> (ogrenciNumarasi, ogrenciAdi, ogrenciTc, ogrenciYas) ve öğrenci ekleme, silme, güncelleme yapan <code>OgrenciIslemleri</code>; main'de bir öğrenci kaydı."
+            ]
+          },
+          {
+            "t": "note",
+            "kind": "trap",
+            "html": "<ul><li><code>bol(5, 12)</code> iki int ile yazılırsa sonuç <b>0</b> olur (tam sayı bölmesi). <code>(double) a / b</code> ile gerçek bölme yapılır.</li><li>Lab slaytında \"Classlar referans tiptir\" vurgusu var: <code>OgrenciIslemleri</code> listede nesnelerin <b>referanslarını</b> tutar; listeden aldığın nesneyi değiştirmek listedekini değiştirir.</li></ul>"
+          },
+          {
+            "t": "h",
+            "text": "Kod örneği: iki proje"
+          },
+          {
+            "t": "dg",
+            "id": "tr-lab3"
+          }
+        ],
+        "checks": [
+          {
+            "type": "mc",
+            "q": "<code>public int bol(int a, int b) { return a / b; }</code> için <code>bol(5, 12)</code> kaç döndürür?",
+            "options": [
+              "0.4166…",
+              "0",
+              "1",
+              "ArithmeticException"
+            ],
+            "answer": 1,
+            "a": "İki int bölününce sonuç int: 5 / 12 = 0."
+          },
+          {
+            "type": "fill",
+            "q": "Öğrenciyi numarasına göre listeden sil:",
+            "code": "public boolean sil(int numara) {\n    for (int i = 0; i < liste.⟦0⟧(); i++)\n        if (liste.⟦1⟧(i).getNumara() == numara) {\n            liste.remove(i);\n            return true;\n        }\n    return false;\n}",
+            "answers": [
+              [
+                "size"
+              ],
+              [
+                "get"
+              ]
+            ],
+            "a": "ArrayList'te boyut <code>size()</code>, eleman <code>get(i)</code>."
           }
         ]
       }
@@ -2806,5 +3111,156 @@
         "out": "50 2147483647"
       }
     ]
+  });
+
+  T("tr-testcircle1", {
+    "files": [
+      {
+        "name": "TestCircle1.java",
+        "code": "\npublic class TestCircle1 {\n    /** Main method */\n    public static void main(String[] args) {\n        // Create a circle with radius 5.0\n        Circle1 myCircle = new Circle1(5.0);\n        System.out.println(\"The area of the circle of radius \"\n            + myCircle.radius + \" is \" + myCircle.getArea());\n\n        // Create a circle with radius 1\n        Circle1 yourCircle = new Circle1();\n        System.out.println(\"The area of the circle of radius \"\n            + yourCircle.radius + \" is \" + yourCircle.getArea());\n\n        // Modify circle radius\n        yourCircle.radius = 100;\n        System.out.println(\"The area of the circle of radius \"\n            + yourCircle.radius + \" is \" + yourCircle.getArea());\n    }\n}\n\n// Define the circle class with two constructors\nclass Circle1 {\n    double radius;\n\n    /** Construct a circle with radius 1 */\n    Circle1() {\n        radius = 1.0;\n    }\n\n    /** Construct a circle with a specified radius */\n    Circle1(double newRadius) {\n        radius = newRadius;\n    }\n\n    /** Return the area of this circle */\n    double getArea() {\n        return radius * radius * Math.PI;\n    }\n}"
+      }
+    ],
+    "output": "The area of the circle of radius 5.0 is 78.53981633974483\nThe area of the circle of radius 1.0 is 3.141592653589793\nThe area of the circle of radius 100.0 is 31415.926535897932"
+  });
+
+  T("tr-tv", {
+    "files": [
+      {
+        "name": "TestTV.java",
+        "code": "\npublic class TestTV {\n    public static void main(String[] args) {\n        TV tv1 = new TV();\n        tv1.turnOn();\n        tv1.setChannel(30);\n        tv1.setVolume(3);\n\n        TV tv2 = new TV();\n        tv2.turnOn();\n        tv2.channelUp();\n        tv2.channelUp();\n        tv2.volumeUp();\n\n        System.out.println(\"tv1's channel is \" + tv1.channel\n            + \" and volume level is \" + tv1.volumeLevel);\n        System.out.println(\"tv2's channel is \" + tv2.channel\n            + \" and volume level is \" + tv2.volumeLevel);\n    }\n}"
+      },
+      {
+        "name": "TV.java",
+        "code": "\npublic class TV {\n    int channel = 1;      // Default channel is 1\n    int volumeLevel = 1;  // Default volume level is 1\n    boolean on = false;   // By default TV is off\n\n    public TV() {\n    }\n\n    public void turnOn() {\n        on = true;\n    }\n\n    public void turnOff() {\n        on = false;\n    }\n\n    public void setChannel(int newChannel) {\n        if (on && newChannel >= 1 && newChannel <= 120)\n            channel = newChannel;\n    }\n\n    public void setVolume(int newVolumeLevel) {\n        if (on && newVolumeLevel >= 1 && newVolumeLevel <= 7)\n            volumeLevel = newVolumeLevel;\n    }\n\n    public void channelUp() {\n        if (on && channel < 120)\n            channel++;\n    }\n\n    public void channelDown() {\n        if (on && channel > 1)\n            channel--;\n    }\n\n    public void volumeUp() {\n        if (on && volumeLevel < 7)\n            volumeLevel++;\n    }\n\n    public void volumeDown() {\n        if (on && volumeLevel > 1)\n            volumeLevel--;\n    }\n}"
+      }
+    ],
+    "steps": [
+      {
+        "file": 0,
+        "lines": [
+          3
+        ],
+        "note": "tv1 oluştu: alanlar başlangıç değerlerini aldı.",
+        "vars": {
+          "tv1": "{channel=1, volume=1, on=false}"
+        }
+      },
+      {
+        "file": 1,
+        "lines": [
+          10,
+          11
+        ],
+        "note": "<code>tv1.turnOn()</code>: yalnızca <b>tv1</b>'in durumu değişti.",
+        "vars": {
+          "tv1": "{channel=1, volume=1, on=true}"
+        }
+      },
+      {
+        "file": 1,
+        "lines": [
+          18,
+          19,
+          20
+        ],
+        "note": "<code>setChannel(30)</code>: TV açık ve 30 aralıkta → kabul.",
+        "vars": {
+          "tv1": "{channel=30, volume=1, on=true}"
+        }
+      },
+      {
+        "file": 1,
+        "lines": [
+          23,
+          24,
+          25
+        ],
+        "note": "<code>setVolume(3)</code>: 1–7 aralığında → kabul.",
+        "vars": {
+          "tv1": "{channel=30, volume=3, on=true}"
+        }
+      },
+      {
+        "file": 0,
+        "lines": [
+          8,
+          9
+        ],
+        "note": "İkinci, <b>bağımsız</b> bir TV nesnesi; açıldı.",
+        "vars": {
+          "tv1": "{channel=30, volume=3, on=true}",
+          "tv2": "{channel=1, volume=1, on=true}"
+        }
+      },
+      {
+        "file": 1,
+        "lines": [
+          28,
+          29,
+          30
+        ],
+        "note": "İki kez <code>channelUp()</code>: 1 → 2 → 3.",
+        "vars": {
+          "tv1": "{channel=30, volume=3, on=true}",
+          "tv2": "{channel=3, volume=1, on=true}"
+        }
+      },
+      {
+        "file": 1,
+        "lines": [
+          38,
+          39,
+          40
+        ],
+        "note": "<code>volumeUp()</code>: 1 → 2.",
+        "vars": {
+          "tv1": "{channel=30, volume=3, on=true}",
+          "tv2": "{channel=3, volume=2, on=true}"
+        }
+      },
+      {
+        "file": 0,
+        "lines": [
+          14,
+          15
+        ],
+        "note": "Alanlara nokta operatörüyle erişim (aynı pakette, default erişim).",
+        "out": "tv1's channel is 30 and volume level is 3"
+      },
+      {
+        "file": 0,
+        "lines": [
+          16,
+          17
+        ],
+        "out": "tv2's channel is 3 and volume level is 2"
+      }
+    ]
+  });
+
+  T("tr-lab3", {
+    "files": [
+      {
+        "name": "DortIslem.java",
+        "code": "\npublic class DortIslem {\n    public int topla(int a, int b)   { return a + b; }\n    public int cikar(int a, int b)   { return a - b; }\n    public int carp(int a, int b)    { return a * b; }\n    public double bol(int a, int b)  { return (double) a / b; }\n}"
+      },
+      {
+        "name": "HesapMakinesi.java",
+        "code": "\npublic class HesapMakinesi {\n    public static void main(String[] args) {\n        DortIslem islem = new DortIslem();\n        int x = 5, y = 12;\n        System.out.println(x + \" + \" + y + \" = \" + islem.topla(x, y));\n        System.out.println(x + \" - \" + y + \" = \" + islem.cikar(x, y));\n        System.out.println(x + \" * \" + y + \" = \" + islem.carp(x, y));\n        System.out.println(x + \" / \" + y + \" = \" + islem.bol(x, y));\n    }\n}"
+      },
+      {
+        "name": "OgrenciBilgileri.java",
+        "code": "\npublic class OgrenciBilgileri {\n    private int ogrenciNumarasi;\n    private String ogrenciAdi;\n    private String ogrenciTc;\n    private int ogrenciYas;\n\n    public OgrenciBilgileri(int numara, String ad, String tc, int yas) {\n        this.ogrenciNumarasi = numara;\n        this.ogrenciAdi = ad;\n        this.ogrenciTc = tc;\n        setOgrenciYas(yas);\n    }\n\n    public int getNumara() { return ogrenciNumarasi; }\n    public String getOgrenciAdi() { return ogrenciAdi; }\n    public void setOgrenciAdi(String ad) { this.ogrenciAdi = ad; }\n    public int getOgrenciYas() { return ogrenciYas; }\n    public void setOgrenciYas(int yas) {\n        if (yas > 0) this.ogrenciYas = yas;      // kapsülleme: doğrulama\n    }\n\n    @Override\n    public String toString() {\n        return ogrenciNumarasi + \" \" + ogrenciAdi + \" (\" + ogrenciYas + \")\";\n    }\n}"
+      },
+      {
+        "name": "OgrenciIslemleri.java",
+        "code": "\nimport java.util.ArrayList;\n\npublic class OgrenciIslemleri {\n    private ArrayList<OgrenciBilgileri> liste = new ArrayList<>();\n\n    public void ekle(OgrenciBilgileri o) {\n        liste.add(o);\n    }\n\n    public boolean sil(int numara) {\n        for (int i = 0; i < liste.size(); i++)\n            if (liste.get(i).getNumara() == numara) {\n                liste.remove(i);\n                return true;\n            }\n        return false;\n    }\n\n    public boolean guncelle(int numara, String yeniAd) {\n        for (OgrenciBilgileri o : liste)\n            if (o.getNumara() == numara) {\n                o.setOgrenciAdi(yeniAd);\n                return true;\n            }\n        return false;\n    }\n\n    public void listele() {\n        System.out.println(liste);\n    }\n}"
+      },
+      {
+        "name": "Okul.java",
+        "code": "\npublic class Okul {\n    public static void main(String[] args) {\n        OgrenciIslemleri islemler = new OgrenciIslemleri();\n        islemler.ekle(new OgrenciBilgileri(101, \"Ece\", \"11111111111\", 20));\n        islemler.ekle(new OgrenciBilgileri(102, \"Can\", \"22222222222\", 21));\n        islemler.listele();\n        islemler.guncelle(102, \"Can Demir\");\n        islemler.sil(101);\n        islemler.listele();\n    }\n}"
+      }
+    ],
+    "output": "--- HesapMakinesi ---\n5 + 12 = 17\n5 - 12 = -7\n5 * 12 = 60\n5 / 12 = 0.4166666666666667\n--- Okul ---\n[101 Ece (20), 102 Can (21)]\n[102 Can Demir (21)]"
   });
 })(window.OOPLab = window.OOPLab || {});

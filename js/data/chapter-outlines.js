@@ -13,14 +13,15 @@
         ['Kullanıcıdan veri alma (Scanner)', ['scanner']],
         ['Karar ve döngü yapıları', ['karar-dongu']],
         ['Metotlar ve method overloading', ['metot-overload']],
-        ['Diziler ve String (Ödev 2 tekrarı)', ['diziler']]
+        ['Diziler ve String (Ödev 2 tekrarı)', ['diziler']],
+        ['Lab Hafta 1 uygulamaları ve Ödev 1', ['lab-hafta1']]
       ],
       concepts: ['main metodu', 'bytecode ve JVM', 'ilkel tipler', 'tam sayı bölmesi', 'casting', 'Scanner', 'nextLine tuzağı', 'switch fall-through', 'do-while', 'metot imzası', 'overloading', 'dizi referansı', 'length']
     },
     ch1: {
       slide: 'Slide01 s.6–89',
       topics: [
-        ['NYP kavramları: nesne ve sınıf', ['nesne-nedir', 'sinif-anatomi']],
+        ['NYP kavramları: nesne ve sınıf', ['nesne-nedir', 'sinif-anatomi', 'tv-ornegi']],
         ['Yapıcılar ve varsayılan yapıcı', ['yapici']],
         ['Referans değişkenleri ve nesnelere erişim', ['referans-iz']],
         ['Varsayılan değerler ve null', ['varsayilan-deger']],
@@ -30,10 +31,11 @@
         ['Görünürlük değiştiricileri, getter/setter', ['gorunurluk', 'kapsulleme']],
         ['Nesneleri metotlara geçirmek', ['pass-by-value']],
         ['Değişmez nesneler, değişken kapsamı, this', ['immutable', 'kapsam', 'this']],
-        ['Nesne dizileri ve ArrayList', ['nesne-dizileri', 'arraylist']],
-        ['Wrapper sınıflar (ek)', ['wrapper']]
+        ['Nesne dizileri, veri yapıları ve ArrayList', ['nesne-dizileri', 'liste-yapilari', 'arraylist']],
+        ['Wrapper sınıflar (ek)', ['wrapper']],
+        ['Lab Hafta 3: HesapMakinesi ve Okul', ['lab-hafta3']]
       ],
-      concepts: ['nesne: kimlik, durum, davranış', 'sınıf = şablon', 'UML (+ - # altı çizili)', 'yapıcı', 'no-arg constructor', 'varsayılan yapıcı', 'referans değişkeni', 'null', 'NullPointerException', 'aliasing', 'garbage collection', 'static / instance', 'public / default / private', 'kapsülleme', 'getter / setter', 'pass-by-value', 'immutable', 'this ve this(...)', 'ArrayList', 'autoboxing']
+      concepts: ['nesne: kimlik, durum, davranış', 'sınıf = şablon', 'UML (+ - # altı çizili)', 'yapıcı', 'no-arg constructor', 'varsayılan yapıcı', 'referans değişkeni', 'null', 'NullPointerException', 'aliasing', 'garbage collection', 'static / instance', 'public / default / private', 'kapsülleme', 'getter / setter', 'pass-by-value', 'immutable', 'this ve this(...)', 'veri yapısı / konteyner nesne', 'dizi tabanlı liste ve kapasite', 'ArrayList', 'Vector', 'autoboxing']
     },
     ch2: {
       slide: 'Slide02 s.2–61',

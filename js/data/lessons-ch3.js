@@ -1154,6 +1154,19 @@
             ]
           },
           {
+            "t": "h",
+            "text": "Slayttaki UML'de (s.44) olup tabloda geçmeyenler"
+          },
+          {
+            "t": "list",
+            "items": [
+              "<code>new File(String parent, String child)</code> ve <code>new File(File parent, String child)</code>: üst dizin + alt ad ile oluşturma.",
+              "<code>getCanonicalPath()</code>: getAbsolutePath gibi ama <code>.</code> ve <code>..</code> gibi gereksiz parçaları atar, sembolik bağlantıları çözer, Windows'ta sürücü harfini büyük yapar. TestFileClass'ta <code>C:\\book\\.\\image\\us.gif</code> → <code>C:\\book\\image\\us.gif</code>.",
+              "<code>lastModified()</code> milisaniye döndürür; okunur tarih için <code>new java.util.Date(file.lastModified())</code>.",
+              "Ayırıcılar (TestFileClass çıktısının son iki satırı): <code>File.pathSeparator</code> yol listelerini ayırır (Windows <code>;</code>, Unix <code>:</code>), <code>File.separator</code> dizin adlarını ayırır (Windows <code>\\</code>, Unix <code>/</code>). Platformdan bağımsız kod için bunlar kullanılır."
+            ]
+          },
+          {
             "t": "br"
           },
           {

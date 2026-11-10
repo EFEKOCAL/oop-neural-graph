@@ -70,6 +70,19 @@
             "html": "Kalıtımın amacı <b>kod tekrarını önlemek</b> ve ortak davranışı tek yerde tutmaktır. Renk mantığında bir hata düzeltirsen üç sınıfta değil tek sınıfta düzeltirsin. Java'da bir sınıf <b>yalnızca bir</b> sınıfı extend edebilir (tekli kalıtım)."
           },
           {
+            "t": "p",
+            "html": "Slayttaki UML'de (s.3) GeometricObject'in <b>iki</b> alt sınıfı var: <b>Circle</b> (<code>-radius</code>, getArea, getPerimeter, getDiameter, printCircle) ve <b>Rectangle</b> (<code>-width</code>, <code>-height</code>, getter/setter'ları, getArea, getPerimeter). İkisi de color, filled ve dateCreated'i miras alır; kendi alanlarını ve metotlarını ekler."
+          },
+          {
+            "t": "p",
+            "html": "Alt sınıf, miras aldığı bir metodu <code>super.</code> ile açıkça çağırabilir (s.20):"
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "public void printCircle() {\n    System.out.println(\"The circle is created \" +\n        super.getDateCreated() + \" and the radius is \" + radius);\n}"
+          },
+          {
             "t": "br"
           },
           {
@@ -532,6 +545,15 @@
             "html": "Override'da A'nın p(double)'ı B'ninkinin <b>yerini alır</b>: A nesnesinde sadece bir p vardır. Overload'da ise A nesnesinde <b>iki ayrı</b> p vardır: B'den gelen p(double) ve A'nın kendi p(int)'i. Derleyici argümanın tipine bakıp hangisini çağıracağını seçer."
           },
           {
+            "t": "p",
+            "html": "Slayt 26'daki görsel özet: <b>override</b>: aynı ad, <b>aynı parametreler</b>, alt sınıfta. <b>Overload</b>: aynı ad, <b>farklı parametreler</b>, aynı sınıfta olabilir."
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "// OVERRIDING: same name, same parameters\nclass Dog {\n    public void bark() { System.out.println(\"woof\"); }\n}\nclass GermanShepherd extends Dog {\n    @Override\n    public void bark() { System.out.println(\"woof woof woof\"); }\n}\n\n// OVERLOADING: same name, different parameters\nclass Dog {\n    public void bark() { System.out.println(\"woof\"); }\n    public void bark(int number) {\n        for (int i = 0; i < number; i++)\n            System.out.println(\"woof\");\n    }\n}"
+          },
+          {
             "t": "h",
             "text": "Kodda gör: adım adım"
           },
@@ -894,6 +916,11 @@
             "t": "note",
             "kind": "why",
             "html": "Casting <b>nesneyi değiştirmez</b>; sadece derleyicinin ona hangi gözlükle baktığını değiştirir. Nesne heap'te neyse odur. Bu yüzden bir Orange'ı Apple gözlüğüyle görmeye çalışmak çalışma zamanında yakalanır (ClassCastException)."
+          },
+          {
+            "t": "note",
+            "kind": "warn",
+            "html": "Bölüm sonu özetinde (s.61) iki cümle bozuk çevrilmiş: (1) \"üst sınıf tarafından tanımlanan bir tür, bir <b>alt tür</b> olarak adlandırılır\" → doğrusu \"<b>üst tür (supertype)</b>\". (2) \"Bir nesnenin bir sınıf örneği olup olmadığını sınamak için <b>AClass nesnesini</b> kullanabilirsiniz\" → doğrusu \"<code>nesne instanceof AClass</code> ifadesini kullanabilirsiniz\"."
           },
           {
             "t": "br"
