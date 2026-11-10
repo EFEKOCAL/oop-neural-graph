@@ -80,9 +80,12 @@
       concepts: ['abstract class', 'abstract method', 'interface', 'implements', 'public static final sabitler', 'çoklu arayüz', 'Comparable', 'compareTo']
     },
     ch5: {
-      slide: 'Hafta 8 · Ara Sınav',
+      slide: 'Hafta 8 · Ara Sınav (hocanın soru formatı)',
       topics: [
-        ['Karma kod izleme', ['karma-iz']],
+        ['Sınav türü 1: kavram boşlukları', ['kavram-bosluk']],
+        ['Sınav türü 2: kodu tamamlama', ['kod-tamamla']],
+        ['Sınav türü 3: kodu anlama (karma kod izleme)', ['karma-iz']],
+        ['Sınav türü 4: arka sayfa problemleri', ['arka-sayfa']],
         ['Deneme sınavı (16 soru)', ['deneme-sinavi']]
       ],
       concepts: ['yapıcı zinciri + static', 'override + super.metot()', 'dinamik bağlama', 'throw / catch / finally', 'toString otomatik çağrısı']

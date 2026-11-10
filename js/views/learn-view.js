@@ -134,15 +134,35 @@
       </div>`;
     }
     if (c.type === 'fill') {
-      const code = OOPLab.java.highlight(String(c.code).replace(/^\n+|\s+$/g, '')).replace(/⟦(\d+)⟧/g, (_, d) => {
-        const w = Math.max(5, ...c.answers[Number(d)].map((x) => x.length)) + 1;
+      const blank = (_, d) => {
+        const w = c.prose ? 12 : Math.max(5, ...c.answers[Number(d)].map((x) => x.length)) + 1;
         return `<input class="fill-in" data-b="${d}" size="${w}" spellcheck="false" autocomplete="off" aria-label="Boşluk ${Number(d) + 1}">`;
-      });
+      };
+      // prose: kavram cümlesi (hocanın klasik boşluk doldurması); değilse kod
+      const body = c.prose
+        ? `<p class="fill-prose">${String(c.text).replace(/⟦(\d+)⟧/g, blank)}</p>`
+        : `<pre class="l-code jcode">${OOPLab.java.highlight(String(c.code).replace(/^\n+|\s+$/g, '')).replace(/⟦(\d+)⟧/g, blank)}</pre>`;
       return `<div class="fx-check${st ? ' ' + st : ''}" data-check="${id}">
-        <p class="fx-check-q"><span class="fill-tag">Boşluk doldur</span> ${q}</p>
-        <pre class="l-code jcode">${code}</pre>
+        <p class="fx-check-q"><span class="fill-tag">${c.prose ? 'Kavram boşluğu' : 'Boşluk doldur'}</span> ${q}</p>
+        ${body}
         <div class="btn-row"><button class="btn btn-primary btn-sm" type="button" data-act="fill">Kontrol et</button><button class="btn btn-sm btn-ghost" type="button" data-act="fillshow">Cevabı göster</button></div>
         <div class="l-check-a" hidden><p class="mc-verdict"></p><p>${c.a || ''}</p></div>
+      </div>`;
+    }
+    if (c.type === 'write') {
+      // Arka sayfa problemi: önce kendin yaz, sonra model çözüm + puanlama listesiyle karşılaştır
+      return `<div class="fx-check wr${st ? ' ' + st : ''}" data-check="${id}">
+        <p class="fx-check-q"><span class="fill-tag wr-tag">Kodu yaz</span> ${q}</p>
+        ${c.given ? `<p class="wr-given">Verilen:</p>${javaLines(c.given)}` : ''}
+        <textarea class="wr-draft" rows="9" spellcheck="false" placeholder="Kodunu kâğıda yazar gibi buraya yaz… (kaydedilir)">${esc(Store.data.drafts[id] || '')}</textarea>
+        <button class="btn btn-primary btn-sm" type="button" data-act="reveal">Model çözümü göster</button>
+        <div class="l-check-a" hidden>
+          ${c.rubric ? `<div class="wr-rubric"><b>Hoca neye bakar? Kendi kodunda işaretle:</b><ul>${c.rubric.map((r) => `<li><label><input type="checkbox"> ${r}</label></li>`).join('')}</ul></div>` : ''}
+          ${javaLines(c.solution)}
+          ${c.output ? `<p class="wr-given">Çıktı:</p><pre class="l-code">${esc(c.output)}</pre>` : ''}
+          ${c.a ? `<p>${c.a}</p>` : ''}
+          <div class="btn-row"><button class="btn btn-sm l-ok" type="button" data-act="ok">✓ Doğru yazdım</button><button class="btn btn-sm l-bad" type="button" data-act="bad">✗ Eksik / yanlış</button></div>
+        </div>
       </div>`;
     }
     return `<div class="fx-check${st ? ' ' + st : ''}" data-check="${id}">
@@ -580,7 +600,7 @@
         <h2 class="fx-title">${l.title}</h2>
         <p class="fx-sub">${l.en} · ${lessonSource(l)} · ~${l.minutes} dk</p>
         ${questionsFor(key).length ? `<p class="tq-lesson">★ Bu derste <b>${questionsFor(key).length} sınav sorusu</b> var. İlgili kartlarda sarı uyarı kutusu çıkar.</p>` : ''}
-        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.code ? javaLines(pre.type === 'fill' ? pre.code.replace(/⟦\d+⟧/g, '____') : pre.code) : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
+        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.prose ? `<p>${String(pre.text).replace(/⟦\d+⟧/g, '____')}</p>` : ''}${pre.code ? javaLines(pre.type === 'fill' ? pre.code.replace(/⟦\d+⟧/g, '____') : pre.code) : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
     } else if (card.kind === 'check') {
       const c = card.check;
       const id = `${key}#${card.n}`;
@@ -926,7 +946,8 @@
         chk.querySelectorAll('.fill-in').forEach((inp) => {
           const acc = c.answers[Number(inp.dataset.b)];
           if (a === 'fillshow') inp.value = acc[0];
-          const ok = acc.some((x) => normAns(x) === normAns(inp.value));
+          const n = (s) => (c.prose ? normAns(s).toLocaleLowerCase('tr') : normAns(s));
+          const ok = acc.some((x) => n(x) === n(inp.value));
           inp.classList.toggle('ok', ok);
           inp.classList.toggle('ko', !ok);
           all = all && ok;
@@ -972,6 +993,12 @@
   }
 
   function onInput(e) {
+    const wr = e.target.closest('.wr-draft');
+    if (wr) {
+      Store.data.drafts[wr.closest('[data-check]').dataset.check] = wr.value;
+      Store.save();
+      return;
+    }
     const ta = e.target.closest('.qx-draft');
     if (ta) {
       Store.data.drafts[ta.closest('[data-q]').dataset.q] = ta.value;
