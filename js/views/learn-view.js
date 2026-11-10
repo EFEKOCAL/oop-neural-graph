@@ -507,6 +507,7 @@
         <span class="tag">BLM2005</span>
         <h2>Nesne Yönelimli Programlama</h2>
         ${action}
+        <a class="fx-map-btn" href="#/map">◎ Nöral genel bakış</a>
       </section>
     </div>`;
   }

@@ -2144,3 +2144,54 @@ label.ds-meth { cursor: pointer; }
   .mc-opt { font-size: 14px; padding: 10px 12px; }
   .jt-code { font-size: 11.5px; }
 }
+
+/* --------------------------------------------------------------- Nöral Bakış (#/map) */
+.fx-map-btn { margin-top: 26px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-strong); color: var(--muted); font-size: 13.5px; text-decoration: none; transition: color 0.15s, border-color 0.15s; }
+.fx-map-btn:hover { color: var(--accent); border-color: rgba(56, 189, 248, 0.5); }
+.nm-head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 24px; margin-bottom: 12px; }
+.nm-head > div:first-child { flex: 1 1 340px; }
+.nm-head h2 { margin: 4px 0 6px; }
+.nm-legend { display: flex; gap: 14px; font-size: 12px; color: var(--faint); }
+.nm-dot { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border-radius: 50%; border: 1.5px solid var(--faint); background: var(--bg); }
+.nm-dot.read { background: var(--ok); border-color: var(--ok); }
+.nm-dot.seen { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.nm-tools { align-items: center; margin: 0; }
+.nm-zoom { min-width: 44px; text-align: center; font: 12px var(--mono); color: var(--faint); }
+.nm-cap { min-height: 40px; margin-bottom: 10px; padding: 9px 14px; border-radius: 10px; border-left: 3px solid var(--accent); background: var(--bg-2); font-size: 13.5px; }
+.nm-cap span { margin-left: 8px; color: var(--muted); }
+.nm-stage { overflow: auto; border: 1px solid var(--border); border-radius: 14px; background:
+  radial-gradient(ellipse at 50% 0%, rgba(56, 189, 248, 0.08), transparent 55%),
+  linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px) 0 0 / 28px 28px,
+  linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px) 0 0 / 28px 28px, var(--bg); }
+.nm-svg { display: block; margin: 0 auto; font-family: var(--sans); }
+.nm-svg a { cursor: pointer; text-decoration: none; }
+.nm-svg a:focus { outline: none; }
+.nm-link, .nm-trunk, .nm-twig, .nm-pulse { fill: none; stroke: var(--c); transition: opacity 0.2s, stroke-width 0.2s; }
+.nm-link { stroke-width: 2; opacity: 0.45; }
+.nm-trunk { stroke-width: 1.6; opacity: 0.35; }
+.nm-twig { stroke-width: 1.2; opacity: 0.3; }
+.nm-pulse { stroke-width: 3; stroke-linecap: round; stroke-dasharray: 8 260; animation: nm-pulse 3.2s linear infinite; opacity: 0.9; filter: drop-shadow(0 0 4px var(--c)); }
+@keyframes nm-pulse { from { stroke-dashoffset: 268; } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .nm-pulse { animation: none; display: none; } }
+.nm-root-glow { fill: rgba(56, 189, 248, 0.12); stroke: rgba(56, 189, 248, 0.25); animation: nm-breathe 3.5s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes nm-breathe { 50% { transform: scale(1.12); opacity: 0.6; } }
+.nm-root-core { fill: #0b2235; stroke: var(--accent); stroke-width: 2.5; }
+.nm-root-t { fill: var(--text); font: 800 15px var(--mono); text-anchor: middle; }
+.nm-root-sub { fill: var(--accent); font: 700 12px var(--mono); }
+.nm-ch-glow { fill: var(--c); opacity: 0.08; transition: opacity 0.2s; }
+.nm-ch-ring { fill: none; stroke: var(--ok); stroke-width: 3; stroke-linecap: round; }
+.nm-ch-core { fill: var(--panel-2); stroke: var(--c); stroke-width: 2.2; transition: fill 0.2s; }
+.nm-ch-t { fill: var(--c); font: 800 14px var(--mono); text-anchor: middle; }
+.nm-ch-sub { fill: var(--text-2); font-size: 12.5px; font-weight: 600; text-anchor: middle; }
+.nm-kid circle { fill: var(--bg); stroke: var(--faint); stroke-width: 1.5; transition: r 0.15s, stroke 0.15s; }
+.nm-kid text { fill: var(--muted); font-size: 12px; transition: fill 0.15s; }
+.nm-kid.seen circle { stroke: var(--accent); stroke-width: 2.2; }
+.nm-kid.read circle { fill: var(--ok); stroke: var(--ok); }
+.nm-kid.read text { fill: var(--text-2); }
+.nm-kid:hover circle, .nm-kid:focus circle { r: 8.5; stroke: var(--c); }
+.nm-kid:hover text, .nm-kid:focus text { fill: var(--text); }
+.nm-ch:hover .nm-ch-glow, .nm-ch:focus .nm-ch-glow { opacity: 0.25; }
+.nm-ch:hover .nm-ch-core { fill: var(--panel-3); }
+/* odak: üzerine gelinen dal parlar, diğerleri söner */
+.nm-svg.focus [data-c]:not(.hot) { opacity: 0.12; }
+.nm-svg.focus .nm-link.hot, .nm-svg.focus .nm-trunk.hot, .nm-svg.focus .nm-twig.hot { opacity: 0.95; stroke-width: 2.4; }
