@@ -29,6 +29,14 @@
     },
     save() {
       try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { /* yok say */ }
+    },
+    // Okunan dersler, kart konumları, soru kutuları, alıştırmalar, taslaklar ve sınav sayacı silinir
+    reset() {
+      this.data = { read: {}, seen: {}, q: {}, checks: {}, drafts: {} };
+      try {
+        localStorage.removeItem(this.key);
+        localStorage.removeItem('ooplab.timer.v1');
+      } catch (e) { /* yok say */ }
     }
   };
   Store.load();
@@ -374,7 +382,7 @@
           <div class="mini-stat"><span>Okunan ders</span><b>${readAll} / ${total}</b></div>
           <div class="mini-stat"><span>Öğrenilen soru</span><b>${learned} / ${qs.length}</b></div>
         </div>
-        <div class="btn-row"><a class="btn btn-primary" href="#/learn">▶ Derse dön</a><a class="btn" href="#/learn/sorular">Sınav soruları</a></div>
+        <div class="btn-row"><a class="btn btn-primary" href="#/learn">▶ Derse dön</a><a class="btn" href="#/learn/sorular">Sınav soruları</a><button class="btn btn-danger" type="button" data-act="reset">↺ İlerlemeyi sıfırla</button></div>
       </section>
 
       <h3 class="l-section">Nasıl çalışmalı? 5 adımlı döngü</h3>
@@ -603,6 +611,7 @@
         <h2>Nesne Yönelimli Programlama</h2>
         ${action}
         <a class="fx-map-btn" href="#/map">◎ Nöral genel bakış</a>
+        ${started || Object.keys(Store.data.q).length ? '<button class="fx-reset-btn" type="button" data-act="reset">↺ İlerlemeyi sıfırla</button>' : ''}
       </section>
     </div>`;
   }
@@ -963,6 +972,12 @@
     const a = act.dataset.act;
 
     if (a === 'menu') { OOPLab.app.toggleSidebar(true); return; }
+    if (a === 'reset') {
+      if (!confirm('Tüm ilerleme silinsin mi?\n\nOkunan dersler, sınav sorusu kutuları, alıştırma cevapları, kod taslakları ve sınav sayacı sıfırlanır. Bu geri alınamaz.')) return;
+      Store.reset();
+      draw();
+      return;
+    }
     if (a === 'solve') {
       act.closest('.l-solve').querySelector('.l-solve-a').hidden = false;
       act.hidden = true;

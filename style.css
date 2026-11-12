@@ -2148,6 +2148,9 @@ label.ds-meth { cursor: pointer; }
 /* --------------------------------------------------------------- Nöral Bakış (#/map) */
 .fx-map-btn { margin-top: 26px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-strong); color: var(--muted); font-size: 13.5px; text-decoration: none; transition: color 0.15s, border-color 0.15s; }
 .fx-map-btn:hover { color: var(--accent); border-color: rgba(56, 189, 248, 0.5); }
+.fx-reset-btn { margin-top: 14px; padding: 6px 12px; border: 0; background: none; color: var(--faint); font: inherit; font-size: 12.5px; cursor: pointer; transition: color 0.15s; }
+.fx-reset-btn:hover { color: var(--danger); }
+.btn.btn-danger:hover { color: var(--danger); border-color: rgba(248, 113, 113, 0.5); }
 .nm-head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 24px; margin-bottom: 12px; }
 .nm-head > div:first-child { flex: 1 1 340px; }
 .nm-head h2 { margin: 4px 0 6px; }

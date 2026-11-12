@@ -18,7 +18,7 @@
 
   function progress() {
     let d = {};
-    try { d = JSON.parse(localStorage.getItem('ooplab.learn.v1')) || {}; } catch (e) { /* kayıt yok */ }
+    try { d = JSON.parse(localStorage.getItem('OOPLab.learn.v1')) || {}; } catch (e) { /* kayıt yok */ }
     return { read: d.read || {}, seen: d.seen || {} };
   }
 
