@@ -1223,8 +1223,33 @@
     draw();
   }
 
+  // Kart içeriği dikeyde ortalanır (.fx-inner margin:auto). Adım adım şekillerde konsol, değişkenler
+  // ve açıklama her adımda uzadığı için ortalanmış blok yukarı kayıyordu. Kartta ilk tıklamada
+  // içerik o anki konumuna sabitlenir; sonraki büyüme yalnızca aşağı doğru olur.
+  function pinCard(e) {
+    const inner = e.target.closest('.fx-card > .fx-inner');
+    if (!inner || inner.dataset.pinned) return;
+    const card = inner.parentElement;
+    const top = inner.getBoundingClientRect().top - card.getBoundingClientRect().top + card.scrollTop - parseFloat(getComputedStyle(card).paddingTop);
+    inner.style.marginTop = `${Math.max(0, top)}px`;
+    inner.style.marginBottom = '0';
+    inner.dataset.pinned = '1';
+  }
+
+  // Pencere boyutu değişince ortalama yeniden hesaplansın
+  function unpinCards() {
+    if (!root) return;
+    root.querySelectorAll('.fx-inner[data-pinned]').forEach((x) => {
+      x.style.marginTop = '';
+      x.style.marginBottom = '';
+      delete x.dataset.pinned;
+    });
+  }
+
   function mount(container, p) {
     root = container;
+    root.addEventListener('click', pinCard, true);
+    window.addEventListener('resize', unpinCards);
     root.addEventListener('click', onClick);
     root.addEventListener('input', onInput);
     root.addEventListener('change', onInput);
@@ -1234,7 +1259,9 @@
   }
 
   function unmount() {
+    window.removeEventListener('resize', unpinCards);
     if (root) {
+      root.removeEventListener('click', pinCard, true);
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
       root.removeEventListener('change', onInput);
