@@ -89,6 +89,38 @@ for (const u of R.units) {
   if (p.answer && p.answer.code) runProgram(`${u.id}-çözüm ${p.answer.main}`, p.answer.main, p.answer.code, p.answer.output);
 }
 
+// Otomatik puanlama desenleri: resmi çözüm tam puan almalı; boş iskelet neredeyse hiç almamalı
+const stripComments = (s) => String(s).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+const score = (checks, src) => {
+  const c = stripComments(src);
+  return checks.map(([label, pts, re, not]) => ({ label, pts, ok: re.test(c) && !(not && not.test(c)) }));
+};
+console.log('Otomatik puanlama');
+for (const u of R.units) {
+  const p = u.practice;
+  if (!p || !p.checks) continue;
+  const total = p.checks.reduce((s, c) => s + c[1], 0);
+  const full = score(p.checks, p.answer.code);
+  const miss = full.filter((r) => !r.ok).map((r) => r.label);
+  check(`${u.id} çözüm tam puan alır (${total}p)`, miss.length === 0, 'tutmayan: ' + miss.join(' | '));
+  if (p.given) {
+    const sk = score(p.checks, p.given).filter((r) => r.ok).reduce((s, r) => s + r.pts, 0);
+    check(`${u.id} boş iskelet düşük puan alır (${sk}p)`, sk <= 6);
+  }
+}
+
+console.log('Soru-cevap');
+vm.runInContext(fs.readFileSync(path.join(root, 'js/data/rapid-quiz.js'), 'utf8'), ctx);
+for (const q of ctx.window.OOPLab.rapid.quiz) {
+  check(`${q.id} cevap indeksi geçerli`, q.answer >= 0 && q.answer < q.options.length);
+  if (q.main) runProgram(`${q.id} ${q.main}`, q.main, q.code, q.options[q.answer]);
+  if (q.errLine) {
+    const c = compile(q.id + '-err', 'Main', q.code);
+    const lines = [...new Set([...c.err.matchAll(/\.java:(\d+): error/g)].map((m) => Number(m[1])))];
+    check(`${q.id} yalnızca ${q.errLine}. satırda derleme hatası`, !c.ok && lines.length === 1 && lines[0] === q.errLine, c.err);
+  }
+}
+
 console.log('Son gün tekrar sayfası');
 checkNotes('ozet:template', R.summary.template.code);
 runProgram('ozet şablon', R.summary.template.main, R.summary.template.code, R.summary.template.output);

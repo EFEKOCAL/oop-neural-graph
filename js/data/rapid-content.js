@@ -1833,6 +1833,26 @@ public class KutuphaneTest {
 }`,
             output: 'Suc ve Ceza odunc verildi\nSuc ve Ceza zaten oduncte\nBilim Teknik sadece salonda okunur\nSuc ve Ceza iade edildi, ceza: 6.0\nKitap: Suc ve Ceza (1866), 687 sayfa\nKitap: Tutunamayanlar (1972), 724 sayfa\nDergi: Bilim Teknik (2024), sayi 680'
           },
+          minutes: 40,
+          // Otomatik kontrol: [madde, puan, eşleşmesi gereken desen, (varsa) eşleşmemesi gereken desen].
+          // Yorumlar silindikten sonra uygulanır. Tahmindir: derleyici değil, iskeletteki kalıpları arar.
+          checks: [
+            ['Materyal soyut sınıf ve <code>Comparable&lt;Materyal&gt;</code>', 4, /abstract\s+class\s+Materyal\s+implements\s+Comparable\s*<\s*Materyal\s*>/],
+            ['Yapıcıda <code>this.ad</code> ve <code>this.yil</code> ataması', 3, /(?=[\s\S]*this\.ad\s*=)(?=[\s\S]*this\.yil\s*=)/],
+            ['Soyut <code>bilgi()</code> metodu', 3, /abstract\s+String\s+bilgi\s*\(\s*\)\s*;/],
+            ['<code>compareTo(Materyal ...)</code> yıla göre', 4, /int\s+compareTo\s*\(\s*Materyal\s+\w+\s*\)\s*\{[^}]*yil/],
+            ['Arayüzde <code>oduncVer()</code>, <code>iadeEt(int)</code>, <code>oduncteMi()</code>', 3, /interface\s+Odunclenebilir\s*\{(?=[^}]*oduncVer\s*\(\s*\))(?=[^}]*iadeEt\s*\(\s*int\s+\w+\s*\))(?=[^}]*oduncteMi\s*\(\s*\))/],
+            ['<code>class Kitap extends Materyal implements Odunclenebilir</code>', 3, /class\s+Kitap\s+extends\s+Materyal\s+implements\s+Odunclenebilir/],
+            ['<code>sayfaSayisi</code> private ve setter yok', 3, /private\s+int\s+sayfaSayisi/, /setSayfaSayisi/],
+            ['Alt sınıf yapıcısında <code>super(ad, yil)</code>', 3, /super\s*\(\s*\w+\s*,\s*\w+/],
+            ['Ödünçteyken tekrar ödünç verme kontrolü', 3, /if\s*\(\s*!?\s*(this\.)?odunc\w*\s*(==\s*(true|false)\s*)?\)/],
+            ['Günlük 2 TL gecikme cezası', 1, /\*\s*2(\.0)?\b|\b2(\.0)?\s*\*|=\s*2(\.0)?\s*;/],
+            ['Dergi: Materyal\'den türer ve <code>bilgi()</code>\'yi yazar', 2, /class\s+Dergi\s+extends\s+Materyal[\s\S]*?String\s+bilgi\s*\(/],
+            ['Kutuphane: <code>ArrayList&lt;Materyal&gt;</code>', 2, /ArrayList\s*<\s*Materyal\s*>/],
+            ['Ödünç verirken <code>instanceof Odunclenebilir</code>', 2, /instanceof\s+Odunclenebilir/],
+            ['Listelerken <code>Collections.sort</code>', 2, /Collections\.sort\s*\(/],
+            ['main: Kitap ve Dergi eklenip listeleniyor', 2, /(?=[\s\S]*new\s+Kitap\s*\()(?=[\s\S]*new\s+Dergi\s*\()(?=[\s\S]*\.listele\s*\(\s*\))/]
+          ],
           rubric: [
             'Soyut sınıf + soyut metot + yapıcıda atama (B1–B3): 8p',
             'compareTo doğru imza ve yön (B4): 5p',
@@ -1977,6 +1997,23 @@ public class RestoranTest {
 }`,
             output: '1-Kofte 220.0\n2-Cay 24.0\n3-Ayran 36.0\nSalon: 3 urun, 268.0\nCay paket servise uygun degil\nPaket: 2 urun, 262.0\nEn pahali: Kofte\nFiyat negatif olamaz'
           },
+          minutes: 40,
+          checks: [
+            ['<code>Urun</code> soyut sınıf', 4, /abstract\s+class\s+Urun\b/],
+            ['<code>fiyat</code> private (kapsülleme)', 3, /private\s+(final\s+)?double\s+fiyat/],
+            ['Otomatik artan ID (static sayaç)', 3, /static\s+int\s+(\w+)[\s\S]*(\+\+\s*\1\b|\b\1\s*\+\+)/],
+            ['Negatif fiyat kontrolü', 3, /fiyat\s*<\s*0|0\s*>\s*fiyat/],
+            ['Soyut KDV metodu ve <code>kdvliFiyat()</code>', 3, /(?=[\s\S]*abstract\s+(public\s+|protected\s+)?\w+\s+\w+\s*\([^)]*\)\s*;)(?=[\s\S]*kdvliFiyat\s*\()/],
+            ['<code>PaketServis</code> arayüzü ve <code>paketlemeUcreti()</code>', 4, /interface\s+PaketServis\s*\{[^}]*paketlemeUcreti\s*\(/],
+            ['<code>Yemek extends Urun implements PaketServis</code>', 3, /class\s+Yemek\s+extends\s+Urun\s+implements\s+PaketServis/],
+            ['<code>Icecek extends Urun</code>', 2, /class\s+Icecek\s+extends\s+Urun\b/],
+            ['<code>KutuIcecek extends Icecek implements PaketServis</code>', 3, /class\s+KutuIcecek\s+extends\s+Icecek\s+implements\s+PaketServis/],
+            ['<code>Comparable&lt;Urun&gt;</code> ve <code>compareTo(Urun ...)</code>', 4, /(?=[\s\S]*implements\s+Comparable\s*<\s*Urun\s*>)(?=[\s\S]*compareTo\s*\(\s*Urun\s+\w+)/],
+            ['Siparis: <code>ArrayList&lt;Urun&gt;</code>', 2, /ArrayList\s*<\s*Urun\s*>/],
+            ['Paket kuralı: <code>instanceof PaketServis</code>', 3, /instanceof\s+PaketServis/],
+            ['<code>urunEkle(Urun, int)</code> overload', 2, /urunEkle\s*\(\s*Urun\s+\w+\s*,\s*int\s+\w+\s*\)/],
+            ['main\'de üst tipte dizi ya da liste', 1, /Urun\s*\[\s*\]\s*\w+|List\s*<\s*Urun\s*>\s*\w+\s*=/]
+          ],
           rubric: [
             'Doğru yapı kararları (soyut sınıf / arayüz) ve gerekçesi: 8p',
             'Kapsülleme, yapıcılar, yapıcı overload, fiyat kontrolü, otomatik ID: 8p',
@@ -2067,6 +2104,19 @@ public class NotSistemi {
 }`,
             output: '85 eklendi\nTipHatasi: 72.5 not olarak eklenemez.\nTipHatasi: 90 not olarak eklenemez.\nAralikHatasi: 105 not olarak eklenemez.\n60 eklendi\nEfe ortalama: 72.5 (2 not)'
           },
+          minutes: 20,
+          checks: [
+            ['<code>NotTipiException extends Exception</code>', 3, /class\s+NotTipiException\s+extends\s+Exception/],
+            ['<code>NotAralikException extends Exception</code>', 3, /class\s+NotAralikException\s+extends\s+Exception/],
+            ['İstisna yapıcısında <code>super(mesaj)</code>', 2, /extends\s+Exception\s*\{[\s\S]*?super\s*\(/],
+            ['Ogrenci\'de private alanlar', 3, /class\s+Ogrenci[\s\S]*?private\s+/],
+            ['<code>ArrayList&lt;Integer&gt;</code> not listesi', 2, /ArrayList\s*<\s*Integer\s*>/],
+            ['<code>notEkle(Object ...) throws</code> iki istisna', 4, /notEkle\s*\(\s*Object\s+\w+\s*\)\s*throws\s+\w+\s*,\s*\w+/],
+            ['<code>instanceof Integer</code> ile tip kontrolü', 2, /instanceof\s+Integer/],
+            ['0–100 aralık kontrolü', 2, /<\s*0[\s\S]{0,60}>\s*100|>\s*100[\s\S]{0,60}<\s*0/],
+            ['İki istisna da <code>throw new</code> ile fırlatılıyor', 2, /(?=[\s\S]*throw\s+new\s+NotTipiException)(?=[\s\S]*throw\s+new\s+NotAralikException)/],
+            ['try-catch ile <code>getMessage()</code> yazdırılıyor', 2, /catch\s*\([^)]*\)\s*\{[^}]*getMessage\s*\(/]
+          ],
           rubric: [
             'İki istisna sınıfı, super(mesaj): 6p',
             'throw ve throws doğru yerde: 6p',
