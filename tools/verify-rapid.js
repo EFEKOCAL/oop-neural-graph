@@ -21,7 +21,9 @@ const root = path.join(__dirname, '..');
 const ctx = { window: {} };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, 'js/data/rapid-content.js'), 'utf8'), ctx);
+vm.runInContext(fs.readFileSync(path.join(root, 'js/data/rapid-notes.js'), 'utf8'), ctx);
 const R = ctx.window.OOPLab.rapid;
+const N = ctx.window.OOPLab.rapidNotes;
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'rapid-'));
 const norm = (s) => String(s).replace(/\r/g, '').split('\n').map((l) => l.replace(/\s+$/, '')).join('\n').replace(/\n+$/, '');
@@ -55,8 +57,25 @@ function runProgram(label, main, code, expected, args) {
   check(label + ' çıktısı', got === norm(expected), `beklenen:\n${norm(expected)}\nalınan:\n${got}`);
 }
 
+// Kenar notları: her çapa kodda bulunmalı ve gerçekten var olan bir kod parçasına bağlı olmalı
+function checkNotes(key, src) {
+  const notes = N.map[key];
+  if (!notes) return;
+  const res = N.resolve(src, notes);
+  const missing = notes.filter((n, i) => !res[i]).map((n) => n[0]);
+  check(`${key} kenar notları (${notes.length})`, missing.length === 0, 'bulunamayan çapa: ' + missing.join(' | '));
+}
+const codeKeys = new Set();
+for (const u of R.units) {
+  (u.snippets || []).forEach((s, i) => codeKeys.add(`${u.id}:${i}`));
+  if (u.practice && u.practice.answer && u.practice.answer.code) codeKeys.add(`${u.id}:answer`);
+}
+Object.keys(N.map).forEach((k) => check(`not anahtarı ${k} bir koda bağlı`, codeKeys.has(k)));
+
 for (const u of R.units) {
   console.log(`${u.no} ${u.title}`);
+  (u.snippets || []).forEach((s, i) => checkNotes(`${u.id}:${i}`, s.code));
+  if (u.practice && u.practice.answer && u.practice.answer.code) checkNotes(`${u.id}:answer`, u.practice.answer.code);
   (u.snippets || []).forEach((s, i) => runProgram(`${u.id}-s${i + 1} ${s.main}`, s.main, s.code, s.output, s.args));
   const p = u.practice;
   if (!p) continue;

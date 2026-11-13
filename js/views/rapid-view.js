@@ -43,6 +43,64 @@
   const nextUndone = () => units().find((u) => !isDone(u)) || null;
 
   const code = (src) => `<pre class="l-code jcode">${OOPLab.java.highlight(trim(src))}</pre>`;
+  // Kenar notlu kod: geniş ekranda notlar sağ sütunda gövdenin hizasında (layoutNotes konumlar),
+  // dar ekranda gövdenin hemen üstünde kodun içinde durur.
+  const noteInner = (n) => `<b>${n.title}</b><span>${n.text}</span>`;
+  function annotated(src, key) {
+    const notes = OOPLab.rapidNotes && OOPLab.rapidNotes.map[key];
+    if (!notes) return code(src);
+    const res = OOPLab.rapidNotes.resolve(src, notes).map((n, k) => n && Object.assign(n, { k })).filter(Boolean);
+    const attrs = (n) => `data-s="${n.s}" data-e="${n.e}"`;
+    const lines = OOPLab.java.highlight(trim(src)).split('\n').map((ln, i) =>
+      res.filter((n) => n.s === i).map((n) => `<span class="rp-note rp-note-in k-${n.kind}" ${attrs(n)}>${noteInner(n)}</span>`).join('')
+      + `<span class="jl" data-l="${i}">${ln || ' '}</span>`).join('');
+    return `<div class="rp-ann">
+      <pre class="l-code jcode rp-ann-code">${lines}</pre>
+      <div class="rp-ann-side">${res.map((n) => `<div class="rp-note k-${n.kind}" ${attrs(n)}>${noteInner(n)}</div>`).join('')}</div>
+    </div>`;
+  }
+
+  const SIDE_MIN = 900;   // kod + not sütunu için gereken en az genişlik
+  function layoutNotes() {
+    if (!root) return;
+    root.querySelectorAll('.rp-ann').forEach((w) => {
+      const side = w.clientWidth >= SIDE_MIN;
+      w.classList.toggle('side', side);
+      if (!side || !w.offsetParent) return;
+      const pre = w.querySelector('pre');
+      const col = w.querySelector('.rp-ann-side');
+      const base = col.getBoundingClientRect().top;
+      let bottom = 0;
+      col.querySelectorAll('.rp-note').forEach((n) => {
+        const ln = pre.querySelector(`.jl[data-l="${n.dataset.s}"]`);
+        const top = Math.max(ln.getBoundingClientRect().top - base, bottom);
+        n.style.top = `${top}px`;
+        bottom = top + n.offsetHeight + 8;
+      });
+      col.style.minHeight = `${bottom}px`;
+    });
+  }
+
+  // Nota gelince kodda gövdenin satırları vurgulanır
+  function markLines(note, on) {
+    const pre = note.closest('.rp-ann').querySelector('pre');
+    const cs = getComputedStyle(note);
+    pre.style.setProperty('--nc', cs.getPropertyValue('--nc'));
+    pre.style.setProperty('--nc-soft', cs.getPropertyValue('--nc-soft'));
+    for (let i = Number(note.dataset.s); i <= Number(note.dataset.e); i++) {
+      const ln = pre.querySelector(`.jl[data-l="${i}"]`);
+      if (ln) ln.classList.toggle('hl', on);
+    }
+    note.classList.toggle('hl', on);
+  }
+  function onHover(e) {
+    const n = e.target.closest('.rp-note');
+    if (!n) return;
+    const to = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.rp-note');
+    if (to === n) return;
+    markLines(n, e.type === 'mouseover');
+  }
+
   const numbered = (src) => `<pre class="rp-lines">${OOPLab.java.lines(src)}</pre>`;
   const output = (text, label) => `<details class="rp-out"><summary>${label || 'Çıktı (önce kendin tahmin et)'}</summary><pre>${esc(text)}</pre></details>`;
   const pointsBadge = (u) => (u.points ? `<span class="rp-pts">≈ ${u.points} / 300 puan</span>` : '');
@@ -107,10 +165,10 @@
       body += `<div class="rp-covers">${u.covers.map((c) => `<span>${esc(c)}</span>`).join('')}</div>`;
     }
     if (u.intro) body += `<p class="rp-intro">${u.intro}</p>`;
-    (u.snippets || []).forEach((s) => {
+    (u.snippets || []).forEach((s, i) => {
       body += `<section class="rp-snip">
         <h3 class="rp-h">${esc(s.title)}</h3>
-        ${code(s.code)}
+        ${annotated(s.code, `${u.id}:${i}`)}
         ${output(s.output)}
       </section>`;
     });
@@ -155,7 +213,7 @@
       <div class="btn-row"><button class="btn btn-primary" type="button" data-act="solve">Çözümü göster</button></div>
       <div class="rp-sol" hidden>
         ${a.html ? `<div class="rp-explain">${a.html}</div>` : ''}
-        ${a.code ? `<h3 class="rp-h">Çözüm${a.main ? ` · ${esc(a.main)}.java` : ''}</h3>${code(a.code)}` : ''}
+        ${a.code ? `<h3 class="rp-h">Çözüm${a.main ? ` · ${esc(a.main)}.java` : ''}</h3>${annotated(a.code, `${u.id}:answer`)}` : ''}
         ${a.output ? `<div class="rp-outbox"><span>${a.code ? 'Çözümün çıktısı' : 'Doğru çıktı'}</span><pre>${esc(a.output)}</pre></div>` : ''}
         ${p.rubric ? `<div class="card rp-rubric"><b>Tahmini puanlama</b><ul class="l-list">${p.rubric.map((x) => `<li>${x}</li>`).join('')}</ul></div>` : ''}
       </div>`;
@@ -188,6 +246,7 @@
       const sol = root.querySelector('.rp-sol');
       sol.hidden = !sol.hidden;
       btn.textContent = sol.hidden ? 'Çözümü göster' : 'Çözümü gizle';
+      layoutNotes();
     }
   }
 
@@ -214,7 +273,9 @@
 
   function draw() {
     const u = units().find((x) => x.id === params[0]);
-    root.innerHTML = `<div class="learn rapid">${u ? pageUnit(u) : pageIndex()}</div>`;
+    root.innerHTML = `<div class="learn rapid${u ? ' rapid-unit' : ''}">${u ? pageUnit(u) : pageIndex()}</div>`;
+    layoutNotes();
+    requestAnimationFrame(layoutNotes);   // yazı tipleri ve kaydırma çubuğu oturduktan sonra yeniden
     OOPLab.app.setHeader(u
       ? { num: 'H', title: `${u.no} · ${u.title}`, sub: 'Hızlandırılmış öğrenme' }
       : { num: 'H', title: 'Hızlandırılmış öğrenme', sub: 'Puan sırasına göre: kod → birleşik örnek → pratik' });
@@ -230,11 +291,17 @@
     root.addEventListener('click', onClick);
     root.addEventListener('input', onInput);
     root.addEventListener('keydown', onKeydown);
+    root.addEventListener('mouseover', onHover);
+    root.addEventListener('mouseout', onHover);
+    window.addEventListener('resize', layoutNotes);
     navigate(p);
   }
 
   function unmount() {
+    window.removeEventListener('resize', layoutNotes);
     if (root) {
+      root.removeEventListener('mouseover', onHover);
+      root.removeEventListener('mouseout', onHover);
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
       root.removeEventListener('keydown', onKeydown);
