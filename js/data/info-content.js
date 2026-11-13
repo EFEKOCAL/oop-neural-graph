@@ -152,6 +152,16 @@ metot(x, c)       → x'in değeri, c'nin referansı kopyalanır</div>`
             </ol>`
         },
         {
+          id: 'ders',
+          title: 'Ders bilgileri (Slide01 s.1–5)',
+          html: `
+            <p><b>BLM2005 Nesne Yönelimli Programlama</b> · Prof. Dr. Kazım Yıldız · Derslik T4-Z05 · Ders saati 2+2 · Kredi 6, ECTS 6.</p>
+            <p><b>Haftalık plan:</b> 1 Dersin tanıtımı · 2 Java programlamaya giriş · 3 Nesneye dayalı programlamaya giriş · 4 Sınıf ve nesne kavramları · 5–6 Kalıtım ve çok biçimlilik · 7 İstisna yönetimi ve metin I/O · <b>8 Ara sınav</b> · 9 Soyut sınıflar ve arayüzler · 10 Olaya dayalı programlama · 11 Kullanıcı arayüzleri oluşturma · 12 Özyineli (recursive) fonksiyonlar · 13 Generic sınıflar · 14 Tasarım şablonlarına giriş · 15 Konu tekrarı.</p>
+            <p><b>Kaynaklar:</b> ders sunumları; Y. Daniel Liang, <i>Introduction to Java Programming, Comprehensive</i>, 8/E, Prentice Hall, 2011; Herbert Schildt, <i>Herkes için Java</i>, Alfa, 2007; Ali Yazıcı, Erdoğan Doğdu ve ark., <i>Java Bilgisayar Programlamaya Giriş</i>, Palme, 2008.</p>
+            <p><b>Değerlendirme</b> (slayt metnindeki tablo): Ara sınav 1 × %25 · Lab quizler 3 × %15 · Lab proje 1 × %10 · Final 1 × %50.</p>
+            <p><b>Devam zorunluluğu:</b> derse %70, laba %80.</p>`
+        },
+        {
           id: 'glossary',
           title: 'Kavram sözlüğü',
           html: `<input class="gl-search" type="search" placeholder="Ara: override, checked, wrapper…" aria-label="Sözlükte ara">

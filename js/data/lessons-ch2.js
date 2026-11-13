@@ -75,6 +75,28 @@
           },
           {
             "t": "p",
+            "html": "UML'deki açıklamalar: <code>color</code> varsayılanı <b>white</b>, <code>filled</code> varsayılanı <b>false</b>, <code>dateCreated</code> nesnenin oluşturulduğu tarih. Liang'ın GeometricObject1 sınıfında <code>toString()</code> şunu döndürür: <code>\"created on \" + dateCreated + \"\\ncolor: \" + color + \" and filled: \" + filled</code>. Yapıcılar: <code>+GeometricObject()</code> ve <code>+GeometricObject(color: String, filled: boolean)</code>; Circle'ın üç, Rectangle'ın üç yapıcısı vardır."
+          },
+          {
+            "t": "h",
+            "text": "Slayttaki Rectangle1 ve TestCircleRectangle (s.3 \"Run\")"
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "public class Rectangle1 extends GeometricObject1 {\n  private double width;\n  private double height;\n\n  public Rectangle1() {\n  }\n\n  public Rectangle1(double width, double height) {\n    this.width = width;\n    this.height = height;\n  }\n\n  public Rectangle1(double width, double height, String color,\n      boolean filled) {\n    this.width = width;\n    this.height = height;\n    setColor(color);      // color private: miras alınan setter ile\n    setFilled(filled);\n  }\n\n  public double getWidth() { return width; }\n  public void setWidth(double width) { this.width = width; }\n  public double getHeight() { return height; }\n  public void setHeight(double height) { this.height = height; }\n\n  public double getArea() { return width * height; }\n  public double getPerimeter() { return 2 * (width + height); }\n}"
+          },
+          {
+            "t": "p",
+            "html": "TestCircleRectangle, yarıçapı 1 olan bir daire ve 2×4'lük bir dikdörtgen oluşturur; miras alınan <code>toString()</code> ve <code>getColor()</code> ile kendi metotlarını (<code>getRadius</code>, <code>getArea</code>, <code>getDiameter</code>, <code>getPerimeter</code>) çağırır. Dikdörtgen için: <code>The area is 8.0</code>, <code>The perimeter is 12.0</code>; daire için alan ≈ 3.14159, çap 2.0."
+          },
+          {
+            "t": "note",
+            "kind": "trap",
+            "html": "Hocanın verdiği Liang kodunda (html klasörü, GeometricObject1.java) yapıcı <code>public GeometricObject1(String Color, boolean filled)</code> diye yazılmış: parametre büyük harfle <code>Color</code>. Bu yüzden içerideki <code>this.color = color;</code> alanı <b>kendisine</b> atar ve renk \"white\" kalır. Java büyük/küçük harfe duyarlıdır; \"hata bul\" sorusu olarak çıkabilir."
+          },
+          {
+            "t": "p",
             "html": "Alt sınıf, miras aldığı bir metodu <code>super.</code> ile açıkça çağırabilir (s.20):"
           },
           {
@@ -937,6 +959,27 @@
           {
             "t": "dg",
             "id": "tr-casting"
+          },
+          {
+            "t": "h",
+            "text": "Slayttaki örnek: Polimorfizm ve Casting (s.40, TestPolymorphismCasting)"
+          },
+          {
+            "t": "p",
+            "html": "İki geometrik nesne oluşturulur: bir daire ve bir dikdörtgen. <code>displayObject</code> (slaytta <code>displayGeometricObject</code>) nesne bir daireyse <b>alanını ve çapını</b>, dikdörtgense <b>alanını</b> gösterir. Parametre tipi <code>Object</code> olduğu için (polimorfizm) her nesne geçirilebilir; alt sınıfa özgü metotlara ulaşmak için önce <code>instanceof</code>, sonra açık cast yapılır."
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "public class TestPolymorphismCasting {\n  public static void main(String[] args) {\n    // Declare and initialize two objects\n    Object object1 = new Circle4(1);\n    Object object2 = new Rectangle1(1, 1);\n\n    // Display circle and rectangle\n    displayObject(object1);\n    displayObject(object2);\n  }\n\n  /** A method for displaying an object */\n  public static void displayObject(Object object) {\n    if (object instanceof Circle4) {\n      System.out.println(\"The circle area is \" +\n        ((Circle4)object).getArea());\n      System.out.println(\"The circle diameter is \" +\n        ((Circle4)object).getDiameter());\n    }\n    else if (object instanceof Rectangle1) {\n      System.out.println(\"The rectangle area is \" +\n        ((Rectangle1)object).getArea());\n    }\n  }\n}"
+          },
+          {
+            "t": "code",
+            "text": "The circle area is 3.141592653589793\nThe circle diameter is 2.0\nThe rectangle area is 1.0"
+          },
+          {
+            "t": "p",
+            "html": "Neden cast şart? <code>object</code>'in bildirilen tipi <code>Object</code>'tir; derleyici Object'te <code>getArea()</code> görmez, <code>object.getArea()</code> derleme hatası olur. <code>((Circle4)object).getArea()</code> ifadesinde dıştaki parantez şarttır: nokta operatörü cast'ten önce işlenir. (Çıktı javac ile doğrulandı.)"
           }
         ],
         "checks": [

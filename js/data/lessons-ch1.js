@@ -33,7 +33,7 @@
         "blocks": [
           {
             "t": "p",
-            "html": "<b>Nesne yönelimli programlama (NYP)</b>, programı birbirleriyle konuşan <b>nesneler</b> olarak kurmaktır. Nesne, gerçek dünyada ayırt edilebilen bir varlığı temsil eder: bir öğrenci, bir daire, bir düğme, hatta bir borç."
+            "html": "<b>Nesne yönelimli programlama (NYP)</b>, programı birbirleriyle konuşan <b>nesneler</b> olarak kurmaktır. Nesne, gerçek dünyada ayırt edilebilen bir varlığı temsil eder: bir öğrenci, bir masa, bir daire, bir düğme, hatta bir borç."
           },
           {
             "t": "p",
@@ -46,6 +46,10 @@
               "<b>Durum (state)</b>: Veri alanlarının (<i>data field / property</i>) o anki değerleri. Ör. <code>radius = 10</code>.",
               "<b>Davranış (behavior)</b>: Nesnenin yapabildikleri, yani <b>metotlar</b>. Ör. <code>getArea()</code>."
             ]
+          },
+          {
+            "t": "p",
+            "html": "Slayt 7–8'in tanımları (boşluk doldurmaya uygun): \"Bir nesnenin <b>durumu</b>, geçerli değerleri ile birlikte bir dizi <b>veri alanından</b> (özellikler olarak da bilinir) oluşur. Bir nesnenin <b>davranışı</b> bir dizi <b>yöntemle (metotla)</b> tanımlanır.\" ve \"Bir nesnenin hem durumu hem de davranışı vardır. <b>Durum nesneyi</b>, <b>davranış</b> ise <b>nesnenin ne yaptığını</b> tanımlar.\""
           },
           {
             "t": "p",
@@ -675,9 +679,11 @@
           {
             "t": "list",
             "items": [
+              "Java, <code>java.util.Date</code> sınıfında <b>sistemden bağımsız</b> bir tarih ve saat kapsüllemesi (encapsulation) sağlar.",
               "<code>new Date()</code> → şu anki tarih/saat.",
               "<code>new Date(long elapsedTime)</code> → 1 Ocak 1970 GMT'den itibaren verilen milisaniye.",
-              "<code>toString()</code>, <code>getTime()</code>, <code>setTime(long)</code>."
+              "<code>toString()</code> → tarih/saati String olarak döndürür; <code>getTime()</code> → 1 Ocak 1970 GMT'den beri geçen milisaniye (<code>long</code>); <code>setTime(long)</code> → nesneye yeni bir geçen süre atar (<code>void</code>).",
+              "Slayttaki örnek: <code>java.util.Date date = new java.util.Date(); System.out.println(date.toString());</code> → <code>Sun Mar 09 13:50:19 EST 2003</code> gibi bir String yazar."
             ]
           },
           {
@@ -689,12 +695,14 @@
             "items": [
               "<code>new Random()</code> → tohum (seed) olarak şu anki zaman.",
               "<code>new Random(seed)</code> → belirli bir tohum.",
-              "<code>nextInt()</code>, <code>nextInt(n)</code> → <b>[0, n)</b> aralığı (n hariç), <code>nextDouble()</code> → [0.0, 1.0), <code>nextBoolean()</code>."
+              "<code>nextInt()</code> → rastgele bir int; <code>nextInt(n)</code> → <b>[0, n)</b> aralığı (n hariç).",
+              "<code>nextLong()</code> → rastgele bir long; <code>nextDouble()</code> → [0.0, 1.0) arası double; <code>nextFloat()</code> → [0.0F, 1.0F) arası float; <code>nextBoolean()</code> → rastgele boolean.",
+              "Slayt 38'in girişi: <code>Math.random()</code> 0.0 ile 1.0 arasında (1.0 hariç) rastgele bir double verir; <code>java.util.Random</code> daha kullanışlı bir üreteçtir."
             ]
           },
           {
             "t": "p",
-            "html": "<b>Aynı tohumla oluşturulan iki Random aynı sayı dizisini üretir.</b> Rastgelelik aslında deterministik bir formüldür."
+            "html": "<b>Aynı tohumla oluşturulan iki Random aynı sayı dizisini üretir.</b> Rastgelelik aslında deterministik bir formüldür. Slayttaki iki <code>new Random(3)</code> nesnesi <code>nextInt(1000)</code> ile ikisi de <code>734 660 210 581 128 202 549 564 459 961</code> yazar (javac ile doğrulandı)."
           },
           {
             "t": "note",
@@ -1119,6 +1127,23 @@
             "html": "Slayttaki şekil: <code>n</code>'nin değeri <code>times</code>'a, <code>myCircle</code>'ın referansı <code>c</code>'ye kopyalanır. Stack'te iki ayrı kutu, heap'te tek bir Circle."
           },
           {
+            "t": "h",
+            "text": "Slayttaki program: TestPassObject (s.55 \"Run\")"
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "public class TestPassObject {\n  public static void main(String[] args) {\n    // Create a Circle object with radius 1\n    Circle myCircle = new Circle(1);\n    // Print areas for radius 1, 2, 3, 4, and 5.\n    int n = 5;\n    printAreas(myCircle, n);\n    // See myCircle.radius and times\n    System.out.println(\"\\n\" + \"Radius is \" + myCircle.getRadius());\n    System.out.println(\"n is \" + n);\n  }\n\n  /** Print a table of areas for radius */\n  public static void printAreas(Circle c, int times) {\n    System.out.println(\"Radius \\t\\tArea\");\n    while (times >= 1) {\n      System.out.println(c.getRadius() + \"\\t\\t\" + c.getArea());\n      c.setRadius(c.getRadius() + 1);\n      times--;\n    }\n  }\n}"
+          },
+          {
+            "t": "code",
+            "text": "Radius \t\tArea\n1.0\t\t3.141592653589793\n2.0\t\t12.566370614359172\n3.0\t\t28.274333882308138\n4.0\t\t50.26548245743669\n5.0\t\t78.53981633974483\n\nRadius is 6.0\nn is 5"
+          },
+          {
+            "t": "p",
+            "html": "Çıktının anlamı: metot içinde <code>times--</code> beş kez çalıştı ama main'deki <code>n</code> hâlâ <b>5</b> (ilkel → değerin kopyası). <code>c.setRadius(...)</code> ise main'deki <code>myCircle</code>'ın gösterdiği <b>aynı nesneyi</b> değiştirdi; bu yüzden yarıçap <b>6.0</b> oldu (referansın kopyası → aynı nesne). (Liang'da sınıfın adı <code>CircleWithPrivateDataFields</code>; burada kısaca <code>Circle</code>. Çıktı javac ile doğrulandı.)"
+          },
+          {
             "t": "note",
             "kind": "why",
             "html": "Bunu \"uzaktan kumandanın kopyası\" gibi düşün: metoda televizyonun değil kumandanın kopyasını verirsin. Kopya kumandayla kanalı değiştirirsen (nesnenin içini değiştirmek) evdeki herkes görür. Ama kopya kumandayı başka bir TV'ye yönlendirirsen (yeni nesne atamak) senin elindeki kumanda hâlâ eski TV'yi gösterir."
@@ -1338,7 +1363,7 @@
           },
           {
             "t": "p",
-            "html": "Normalde <code>radius</code> yazdığında Java aslında <code>this.radius</code> anlar; this genellikle gizli olarak oradadır."
+            "html": "Normalde <code>radius</code> yazdığında Java aslında <code>this.radius</code> anlar; this genellikle gizli olarak oradadır. Slayt 64: \"Every instance variable belongs to an instance represented by this, which is normally omitted.\" Aynısı metotlar için de geçerlidir: <code>return \"radius: \" + this.radius + \"area: \" + this.getArea();</code> ile <code>return \"radius: \" + radius + \"area: \" + getArea();</code> <b>eşdeğerdir</b>."
           },
           {
             "t": "note",
@@ -1665,6 +1690,72 @@
             "html": "<code>&lt;String&gt;</code> kısmı listenin <b>hangi tipte nesne</b> tutacağını söyler (generic). Diziden liste: <code>new ArrayList&lt;&gt;(Arrays.asList(array))</code>."
           },
           {
+            "t": "h",
+            "text": "Slayttaki UML: metotlar ve dönüş tipleri (s.81)"
+          },
+          {
+            "t": "table",
+            "head": [
+              "java.util.ArrayList",
+              "Ne yapar?"
+            ],
+            "rows": [
+              ["<code>+ArrayList()</code>", "Boş bir liste oluşturur."],
+              ["<code>+add(o: Object): void</code>", "o'yu listenin <b>sonuna</b> ekler."],
+              ["<code>+add(index: int, o: Object): void</code>", "o'yu belirtilen indekse ekler."],
+              ["<code>+clear(): void</code>", "Tüm elemanları siler."],
+              ["<code>+contains(o: Object): boolean</code>", "Liste o'yu içeriyorsa true."],
+              ["<code>+get(index: int): Object</code>", "Belirtilen indeksteki elemanı döndürür."],
+              ["<code>+indexOf(o: Object): int</code>", "o'ya eşit <b>ilk</b> elemanın indeksi."],
+              ["<code>+isEmpty(): boolean</code>", "Listede eleman yoksa true."],
+              ["<code>+lastIndexOf(o: Object): int</code>", "o'ya eşit <b>son</b> elemanın indeksi."],
+              ["<code>+remove(o: Object): boolean</code>", "o'yu listeden siler; silindiyse true."],
+              ["<code>+size(): int</code>", "Eleman sayısı."],
+              ["<code>+remove(index: int): Object</code>", "Belirtilen indeksteki elemanı siler ve <b>silinen elemanı</b> döndürür."],
+              ["<code>+set(index: int, o: Object): Object</code>", "Belirtilen indeksteki elemanı değiştirir ve <b>eski elemanı</b> döndürür."]
+            ]
+          },
+          {
+            "t": "note",
+            "kind": "trap",
+            "html": "İki <code>remove</code>'un dönüş tipi farklıdır: <code>remove(Object)</code> → <b>boolean</b>, <code>remove(int)</code> → <b>silinen eleman</b>. Ör. <code>[London, Denver, Paris]</code> için <code>set(1, \"Xian\")</code> → \"Denver\" döner; ardından <code>remove(0)</code> → \"London\" döner; <code>remove(\"Rome\")</code> → false; <code>indexOf(\"Rome\")</code> → -1 (javac ile doğrulandı)."
+          },
+          {
+            "t": "h",
+            "text": "Oluşturma örnekleri (s.82)"
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "// String saklayan bir ArrayList; referansı cities'e atanır\nArrayList<String> cities = new ArrayList<String>();\n\n// Tarih (java.util.Date) saklayan bir ArrayList; referansı dates'e atanır\nArrayList<java.util.Date> dates = new ArrayList<java.util.Date>();\n\n// JDK 7+: sağ taraftaki tip yazılmayabilir (diamond)\nArrayList<String> list = new ArrayList<>();"
+          },
+          {
+            "t": "h",
+            "text": "Slayttaki iki ArrayList örneği (s.83–84)"
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "ArrayList al = new ArrayList();               // s.83: tipsiz liste\nSystem.out.println(\"Initial size of al: \" + al.size());\n// Eleman Ekleme\nal.add(\"C\");\nal.add(\"A\");\nal.add(\"E\");\nal.add(\"B\");\nal.add(\"D\");\nSystem.out.println(al);"
+          },
+          {
+            "t": "code",
+            "text": "Initial size of al: 0\n[C, A, E, B, D]"
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "import java.util.*;\npublic class ArrayList01 {                     // s.84\n    public static void main(String[] args) {\n        ArrayList<String> list = new ArrayList<String>();\n        list.add(\"İzmir\");\n        list.add(\"Erzurum\");\n        list.add(\"Giresun\");\n        list.add(\"Konya\");\n        list.add(\"Antalya\");\n        System.out.println(list);\n        System.out.println(\"3: \" + list.get(3));\n        System.out.println(\"0: \" + list.get(0));\n    }\n}"
+          },
+          {
+            "t": "code",
+            "text": "[İzmir, Erzurum, Giresun, Konya, Antalya]\n3: Konya\n0: İzmir"
+          },
+          {
+            "t": "p",
+            "html": "ArrayList ekleme sırasını korur (sıralamaz): <code>[C, A, E, B, D]</code>. İndeksler 0'dan başlar: <code>get(3)</code> dördüncü eleman olan <b>Konya</b>'dır. <code>println(list)</code> listenin <code>toString()</code>'ini çağırır ve köşeli parantezli biçimi yazar. (Çıktılar javac ile doğrulandı.)"
+          },
+          {
             "t": "p",
             "html": "<b>Ne zaman hangisi?</b> Eleman sayısı belli ve değişmiyorsa dizi; değişkense veya liste metotlarına ihtiyaç varsa ArrayList."
           },
@@ -1700,6 +1791,19 @@
           {
             "t": "dg",
             "id": "tr-arraylist"
+          },
+          {
+            "t": "p",
+            "html": "Slayttaki TestArrayList (s.86–88) iki ayrıntı daha içerir: konum sorusu <code>\"The location of Denver in the list? \"</code> diye yazılır (sonuç 1) ve programın sonunda listeye <b>Circle nesneleri</b> konur:"
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "// Create a list to store two circles\nArrayList<Circle> list = new ArrayList<>();\n\n// Add two circles\nlist.add(new Circle(2));\nlist.add(new Circle(3));\n\n// Display the area of the first circle in the list\nSystem.out.println(\"The area of the circle? \" +\n  list.get(0).getArea());"
+          },
+          {
+            "t": "p",
+            "html": "<code>list.get(0)</code> doğrudan <code>Circle</code> döndürdüğü için (tipli liste) cast gerekmeden <code>.getArea()</code> çağrılır; sonuç yarıçapı 2 olan dairenin alanıdır (≈ 12.566)."
           }
         ],
         "checks": [
@@ -1715,6 +1819,31 @@
             "answer": 0,
             "a": "add(1,\"X\") → [A, X, B, C]. remove(2) 2. indeksteki B'yi siler → [A, X, C].",
             "code": "ArrayList<String> l = new ArrayList<>();\nl.add(\"A\"); l.add(\"B\"); l.add(\"C\");\nl.add(1, \"X\");\nl.remove(2);\nSystem.out.println(l);"
+          },
+          {
+            "type": "mc",
+            "q": "Slayt 84'teki ArrayList01 için <code>list.get(3)</code> ne yazdırır?",
+            "options": [
+              "Giresun",
+              "Konya",
+              "Antalya",
+              "IndexOutOfBoundsException"
+            ],
+            "answer": 1,
+            "a": "İndeks 0'dan başlar: 0 İzmir, 1 Erzurum, 2 Giresun, 3 Konya.",
+            "code": "ArrayList<String> list = new ArrayList<String>();\nlist.add(\"İzmir\"); list.add(\"Erzurum\"); list.add(\"Giresun\");\nlist.add(\"Konya\"); list.add(\"Antalya\");\nSystem.out.println(\"3: \" + list.get(3));"
+          },
+          {
+            "type": "mc",
+            "q": "<code>ArrayList</code>'te <code>remove(index: int)</code> ve <code>set(index, o)</code> ne döndürür?",
+            "options": [
+              "İkisi de void",
+              "remove: boolean, set: boolean",
+              "remove: silinen eleman, set: eski eleman",
+              "remove: yeni boyut, set: yeni eleman"
+            ],
+            "answer": 2,
+            "a": "Slayt 81 UML: +remove(index: int): Object, +set(index: int, o: Object): Object. remove(o: Object) ise boolean döndürür."
           },
           {
             "type": "fill",

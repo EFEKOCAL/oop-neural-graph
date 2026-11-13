@@ -237,12 +237,12 @@
             ],
             "rows": [
               [
-                "<b>Error</b>",
+                "<b>Error</b> (fatal / ölümcül)",
                 "JVM; iç sistem hataları. Nadirdir.",
                 "Kullanıcıyı bilgilendirip düzgünce kapatmaktan öte yapılacak pek bir şey yoktur."
               ],
               [
-                "<b>Exception</b>",
+                "<b>Exception</b> (nonfatal / ölümcül değil)",
                 "Programın neden olduğu hatalar ve <b>dış koşullar</b> (dosya yok, ağ koptu).",
                 "Yakalanabilir ve yönetilebilir."
               ],
@@ -1379,8 +1379,8 @@
                 "Okunacak token var mı?"
               ],
               [
-                "<code>next()</code>, <code>nextInt()</code>, <code>nextDouble()</code>…",
-                "Sonraki token'ı ilgili tipte döndürür"
+                "<code>next(): String</code>, <code>nextByte(): byte</code>, <code>nextShort(): short</code>, <code>nextInt(): int</code>, <code>nextLong(): long</code>, <code>nextFloat(): float</code>, <code>nextDouble(): double</code>",
+                "Sonraki token'ı ilgili tipte döndürür (slayt 50'deki UML'nin tamamı)"
               ],
               [
                 "<code>nextLine()</code>",
