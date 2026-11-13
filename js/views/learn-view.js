@@ -610,6 +610,7 @@
         <span class="tag">BLM2005</span>
         <h2>Nesne Yönelimli Programlama</h2>
         ${action}
+        <a class="fx-rapid-btn" href="#/hizli"><b>Hızlandırılmış öğrenme</b><small>Sınav puanı sırasıyla: yorumlu kod → birleşik örnek → kod yazma pratiği</small></a>
         <a class="fx-map-btn" href="#/map">◎ Nöral genel bakış</a>
         ${started || Object.keys(Store.data.q).length ? '<button class="fx-reset-btn" type="button" data-act="reset">↺ İlerlemeyi sıfırla</button>' : ''}
       </section>
