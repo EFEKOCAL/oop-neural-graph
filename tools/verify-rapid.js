@@ -65,7 +65,7 @@ function checkNotes(key, src) {
   const missing = notes.filter((n, i) => !res[i]).map((n) => n[0]);
   check(`${key} kenar notları (${notes.length})`, missing.length === 0, 'bulunamayan çapa: ' + missing.join(' | '));
 }
-const codeKeys = new Set();
+const codeKeys = new Set(['ozet:template']);
 for (const u of R.units) {
   (u.snippets || []).forEach((s, i) => codeKeys.add(`${u.id}:${i}`));
   if (u.practice && u.practice.answer && u.practice.answer.code) codeKeys.add(`${u.id}:answer`);
@@ -88,6 +88,10 @@ for (const u of R.units) {
   }
   if (p.answer && p.answer.code) runProgram(`${u.id}-çözüm ${p.answer.main}`, p.answer.main, p.answer.code, p.answer.output);
 }
+
+console.log('Son gün tekrar sayfası');
+checkNotes('ozet:template', R.summary.template.code);
+runProgram('ozet şablon', R.summary.template.main, R.summary.template.code, R.summary.template.output);
 
 fs.rmSync(work, { recursive: true, force: true });
 console.log(`\n${pass} başarılı, ${fail} başarısız`);

@@ -31,6 +31,133 @@
       note: 'Rakamlar yaklaşıktır. 40-45 puanlık tasarım soruları birden fazla konuyu ölçtüğü için puanları konulara bölündü; boşluk ve D/Y maddeleri tek tek konusuna yazıldı.'
     },
 
+    // Son gün tekrar sayfası (#/hizli/ozet): yazdırılabilir tek sayfalık özet
+    summary: {
+      plan: [
+        ['Kavram boşlukları', '15p', '~8 dk', 'Bildiklerini hemen yaz, takıldığını boş bırakıp sona sakla.'],
+        ['Büyük tasarım / iskelet', '40p', '~35 dk', 'Önce istekleri numarala, her isteği kodda bir yerle eşleştir. Derlenmese de kısmi puan var: her kavramı göster.'],
+        ['Çıktı soruları', '15–30p', '~20 dk', 'Değişkenleri kâğıtta tablo yap, her satırda güncelle. print / println farkına bak.'],
+        ['Hata bul / düzelt', '15p', '~12 dk', 'Satır numarası + neden + düzeltilmiş satır + çıktı. Aşağıdaki kontrol listesini satır satır uygula.']
+      ],
+      checklist: [
+        '"Nesnesi oluşturulamamalı" ya da ortak alan/yapıcı var → <b>abstract class</b>. "Bazıları yapabilir" ya da farklı ağaçlara yayılan yetenek → <b>interface</b>.',
+        'Alanlar <b>private</b>, yapıcıda atanır, <b>getter</b> var. "Yalnızca getter ile erişilmeli" → setter <b>yok</b>.',
+        'Alt sınıf yapıcısının <b>ilk satırı</b> <code>super(...)</code>.',
+        'Önce <code>extends</code>, sonra <code>implements</code>. Override edilen her metot <b>public</b> ve üstünde <code>@Override</code>.',
+        'Karşılaştırma isteniyorsa kökte <code>implements Comparable&lt;Kok&gt;</code> + <code>compareTo</code> (<code>Double.compare</code> / <code>Integer.compare</code>).',
+        'Yönetici sınıf: <code>private ArrayList&lt;Kok&gt; liste = new ArrayList&lt;&gt;();</code> + ekle + listele. Eklemede iş kuralı varsa <code>instanceof</code>.',
+        'Arayüz metodunu üst tip referansla çağırmak için <code>if (x instanceof Arayuz) ((Arayuz) x).metot();</code>',
+        'main: üst tip <b>dizi/liste</b>, döngüde aynı çağrı = çok biçimlilik. İstenen kavramları (overload, yapıcı overload) en az bir kez göster.',
+        '<code>import java.util.ArrayList;</code> (ve gerekiyorsa <code>Collections</code>) dosyanın en üstünde.'
+      ],
+      template: {
+        main: 'Test',
+        code: J`import java.util.ArrayList;
+
+abstract class Kok implements Comparable<Kok> {     // nesnesi yok + karşılaştırılabilir
+    private String ad;                              // kapsülleme
+    private double fiyat;
+    public Kok(String ad, double fiyat) { this.ad = ad; this.fiyat = fiyat; }
+    public String getAd() { return ad; }            // yalnızca getter → salt okunur
+    public double getFiyat() { return fiyat; }
+    public abstract String durum();                 // soyut metot
+    @Override
+    public int compareTo(Kok k) { return Double.compare(fiyat, k.fiyat); }
+}
+
+interface Yetenek { void calis(); }                 // yalnızca bazı sınıflarda
+
+class AltA extends Kok implements Yetenek {         // extends önce, implements sonra
+    private int ozellik;
+    public AltA(String ad, double fiyat, int ozellik) {
+        super(ad, fiyat);                           // ilk satır
+        this.ozellik = ozellik;
+    }
+    public int getOzellik() { return ozellik; }
+    @Override public String durum() { return getAd() + " A " + ozellik; }
+    @Override public void calis() { System.out.println(getAd() + " calisiyor"); }
+}
+
+class AltB extends Kok {
+    public AltB(String ad, double fiyat) { super(ad, fiyat); }
+    @Override public String durum() { return getAd() + " B"; }
+}
+
+class Yonetici {
+    private ArrayList<Kok> liste = new ArrayList<>();
+    public void ekle(Kok k) { liste.add(k); }
+    public void ekle(Kok k, boolean sadeceYetenekli) {           // overload
+        if (!sadeceYetenekli || k instanceof Yetenek) liste.add(k);
+    }
+    public void listele() {
+        for (Kok k : liste) {
+            System.out.println(k.durum());                       // dinamik bağlama
+            if (k instanceof Yetenek) ((Yetenek) k).calis();     // arayüz metodu
+        }
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Yonetici y = new Yonetici();
+        y.ekle(new AltA("a1", 50, 3));
+        y.ekle(new AltB("b1", 20), true);                        // eklenmez
+        y.ekle(new AltB("b2", 10));
+        y.listele();
+        System.out.println(new AltB("x", 5).compareTo(new AltA("y", 9, 1)));
+    }
+}`,
+        output: 'a1 A 3\na1 calisiyor\nb2 B\n-1'
+      },
+      rules: [
+        ['Soyut sınıf ve arayüz', [
+          'Soyut sınıfın <b>yapıcısı olur</b>, nesnesi olmaz. Soyut metodu hiç olmayabilir.',
+          'Soyut metot: gövde yok, <code>;</code>. Uygulamayan alt sınıf da abstract olmalı.',
+          '<code>abstract</code> + <code>private / static / final</code> birlikte olmaz.',
+          'Arayüz: alanlar <code>public static final</code> (değiştirilemez), metotlar <code>public abstract</code>, <b>yapıcı yok</b>.',
+          'Arayüz arayüzü <code>extends</code> eder. Aynı imza + farklı dönüş tipi → derleme hatası.',
+          'Cloneable: metotsuz <b>marker</b> arayüz; <code>clone()</code> Object\'te ve protected. Yoksa CloneNotSupportedException.'
+        ]],
+        ['Kalıtım ve yapıcılar', [
+          'İlk satır super/this değilse derleyici <code>super();</code> ekler.',
+          'Hiç yapıcı yoksa parametresiz varsayılan yapıcı eklenir; bir tane yazılırsa eklenmez.',
+          'Üstte parametresiz yapıcı yoksa alt sınıfta <code>super(arg)</code> zorunlu.',
+          '<code>super(...)</code> ve <code>this(...)</code> aynı yapıcıda olamaz; ikisi de ilk satırda.',
+          'Yazdırmalar geri dönerken olur: en üst sınıfın yapıcısı önce biter.',
+          'Alan başlatıcılar <code>super()</code> bittikten sonra çalışır.'
+        ]],
+        ['Override, overload, dinamik bağlama', [
+          'Override: aynı imza, erişim daraltılamaz, çalışma zamanında gerçek tipe göre seçilir.',
+          'Overload: farklı parametre listesi; derleme zamanında seçilir. Sadece dönüş tipi farkı → hata.',
+          'final metot override edilemez, final sınıf extends edilemez.',
+          'Derleyici referans tipine bakar: üst tipte olmayan metot çağrılamaz.',
+          'Downcast: <code>instanceof</code> sonra <code>(Alt)</code>. Yanlış nesne → ClassCastException.',
+          '<code>equals(Object o)</code> parametresi Object olmalı; <code>==</code> adres karşılaştırır.'
+        ]],
+        ['static ve kapsülleme', [
+          'static alan tüm nesnelerde tek kopya; static metotta <code>this</code> yok.',
+          'Erişim: private &lt; default (paket) &lt; protected &lt; public.',
+          'Referans ataması nesneyi kopyalamaz; iki değişken aynı nesneyi gösterir.',
+          '<code>ArrayList&lt;Integer&gt;</code> (int değil); <code>size()</code>, dizi <code>length</code>, String <code>length()</code>.'
+        ]],
+        ['İstisnalar', [
+          'Checked (IOException, FileNotFound, kendi <code>extends Exception</code>): yakala ya da <code>throws</code>.',
+          'Unchecked (RuntimeException altı): Arithmetic, NullPointer, ArrayIndexOutOfBounds, NumberFormat, ClassCast, IllegalArgument.',
+          '<code>throw new X(...)</code> fırlatır; <code>throws X</code> başlıkta bildirir.',
+          'İlk uyan catch çalışır; alt sınıf catch\'i üstte olmalı.',
+          'finally her zaman çalışır, return\'den önce de. Yakalanmayan istisna finally\'den sonra yayılır.',
+          '<code>parseInt("null")</code> → NumberFormatException ("null" bir metin).'
+        ]]
+      ],
+      trace: [
+        'Hangi sınıfın nesnesi oluşuyor? Yapıcı zincirini en üste kadar çiz, sonra aşağı doğru yazdır.',
+        'Her çağrıda iki soru: hangi imza (overload, referans tipi)? hangi sınıfın sürümü (override, gerçek tip)?',
+        'static alanları ayrı bir kutuda tut; tüm nesneler aynı kutuyu değiştirir.',
+        'try içinde hata olan satırdan sonrası atlanır; hangi catch uyuyor; finally; sonra devam mı, yayılma mı?',
+        '<code>print</code> satır sonu koymaz, <code>println</code> koyar. <code>"1" + 2 + 3</code> → 123, <code>1 + 2 + "3"</code> → 33.'
+      ]
+    },
+
     units: [
       /* ================================================================ KONU 1 */
       {

@@ -195,6 +195,16 @@
       ['public static void main', `Test`, `Çok biçimlilik, Otonom dizisi, şoför kuralları, klon, sıralama.`]
     ],
 
+    /* ---------------- Son gün sayfasındaki şablon */
+    'ozet:template': [
+      ['abstract class Kok', `Kök: soyut + Comparable`, `private alanlar, yapıcıda atama, yalnızca getter, soyut metot, compareTo.`],
+      ['interface Yetenek', `Yetenek arayüzü`, `"Bazıları yapabilir" isteği.`],
+      ['class AltA extends Kok implements Yetenek', `Yetenekli alt sınıf`, `İlk satır <code>super(...)</code>; soyut metot ve arayüz metodu public + @Override.`],
+      ['class AltB extends Kok', `Yeteneksiz alt sınıf`, `Yalnızca soyut metodu yazar.`],
+      ['class Yonetici', `Yönetici`, `ArrayList&lt;Kok&gt;, overload'lu ekle, instanceof kuralı, döngüde dinamik bağlama.`],
+      ['public class Test', `main`, `Üst tip üzerinden ekleme ve listeleme = çok biçimlilik.`]
+    ],
+
     /* ---------------- Pratik çözümleri */
     'p1:answer': [
       ['abstract class Materyal', `[B1]–[B4]`, `Comparable&lt;Materyal&gt;, yapıcıda atama, soyut <code>bilgi()</code>, yıla göre compareTo.`],

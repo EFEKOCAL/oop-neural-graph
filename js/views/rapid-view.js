@@ -120,6 +120,7 @@
         <div class="rp-progress"><div class="l-bar"><i style="width:${Math.round((done / all.length) * 100)}%"></i></div><span>${done} / ${all.length} ünite</span></div>
         <div class="btn-row">
           ${nx ? `<a class="btn btn-primary" href="${unitHref(nx)}">▶ ${done ? 'Devam et' : 'Başla'}: ${nx.no} ${esc(nx.title)}</a>` : '<span class="pill ok">Tüm üniteler bitti</span>'}
+          <a class="btn" href="#/hizli/ozet">Son gün tekrar sayfası</a>
           <a class="btn" href="#/learn">Normal akışa dön</a>
         </div>
       </section>
@@ -146,6 +147,46 @@
     if (u.snippets && u.stage === 'konu') return `${u.snippets.length} kod parçası`;
     if (u.covers) return u.covers.slice(0, 5).join(' · ') + (u.covers.length > 5 ? ' …' : '');
     return u.format || '';
+  }
+
+  /* ------------------------------------------------------------ son gün tekrar sayfası */
+
+  function pageSummary() {
+    const S = OOPLab.rapid.summary;
+    const blanks = (units().find((u) => u.blanks) || { blanks: [] }).blanks;
+    return `
+      <nav class="l-crumbs no-print"><a href="#/hizli">Hızlandırılmış öğrenme</a> › Son gün tekrarı</nav>
+      <section class="card rp-head">
+        <span class="tag">BLM2005 · Ara sınav · 80 dakika</span>
+        <h2>Son gün tekrar sayfası</h2>
+        <p>Sınav sabahı 15 dakikada göz gezdirmek için. Yazdırınca beyaz zemin üzerine siyah çıkar.</p>
+        <div class="btn-row no-print"><button class="btn btn-primary" type="button" data-act="print">Yazdır / PDF kaydet</button><a class="btn" href="#/hizli">Listeye dön</a></div>
+      </section>
+
+      <h3 class="l-section">Süre planı</h3>
+      <div class="card"><div class="table-wrap"><table class="rp-table">
+        <thead><tr><th>Soru türü</th><th class="num">Puan</th><th class="num">Süre</th><th>Nasıl</th></tr></thead>
+        <tbody>${S.plan.map((r) => `<tr><td><b>${r[0]}</b></td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody>
+      </table></div></div>
+
+      <h3 class="l-section">40 puanlık soru kontrol listesi</h3>
+      <div class="card"><ol class="l-list rp-check">${S.checklist.map((x) => `<li>${x}</li>`).join('')}</ol></div>
+
+      <h3 class="l-section">Tasarım sorusu şablonu</h3>
+      ${annotated(S.template.code, 'ozet:template')}
+      <div class="rp-outbox"><span>Şablonun çıktısı</span><pre>${esc(S.template.output)}</pre></div>
+
+      <h3 class="l-section">Kurallar</h3>
+      <div class="rp-rules">${S.rules.map(([t, items]) => `
+        <section class="card"><b>${t}</b><ul class="l-list">${items.map((x) => `<li>${x}</li>`).join('')}</ul></section>`).join('')}</div>
+
+      <h3 class="l-section">Çıktı sorusu yöntemi</h3>
+      <div class="card"><ol class="l-list">${S.trace.map((x) => `<li>${x}</li>`).join('')}</ol></div>
+
+      <h3 class="l-section">Kavram boşlukları: cevaplar</h3>
+      <div class="card"><div class="table-wrap"><table class="rp-table rp-blank-table"><tbody>
+        ${blanks.map(([q, a]) => `<tr><td>${q}</td><td><b>${a}</b></td></tr>`).join('')}
+      </tbody></table></div></div>`;
   }
 
   /* ------------------------------------------------------------ ünite sayfası */
@@ -242,6 +283,8 @@
         if (nx) { location.hash = unitHref(nx); return; }
       }
       draw();
+    } else if (btn.dataset.act === 'print') {
+      window.print();
     } else if (btn.dataset.act === 'solve') {
       const sol = root.querySelector('.rp-sol');
       sol.hidden = !sol.hidden;
@@ -273,7 +316,15 @@
 
   function draw() {
     const u = units().find((x) => x.id === params[0]);
-    root.innerHTML = `<div class="learn rapid${u ? ' rapid-unit' : ''}">${u ? pageUnit(u) : pageIndex()}</div>`;
+    const ozet = params[0] === 'ozet';
+    document.body.classList.toggle('rp-summary', ozet);
+    root.innerHTML = `<div class="learn rapid${u || ozet ? ' rapid-unit' : ''}">${ozet ? pageSummary() : u ? pageUnit(u) : pageIndex()}</div>`;
+    if (ozet) {
+      OOPLab.app.setHeader({ num: 'H', title: 'Son gün tekrarı', sub: 'Hızlandırılmış öğrenme' });
+      layoutNotes();
+      requestAnimationFrame(layoutNotes);
+      return;
+    }
     layoutNotes();
     requestAnimationFrame(layoutNotes);   // yazı tipleri ve kaydırma çubuğu oturduktan sonra yeniden
     OOPLab.app.setHeader(u
@@ -299,6 +350,7 @@
 
   function unmount() {
     window.removeEventListener('resize', layoutNotes);
+    document.body.classList.remove('rp-summary');
     if (root) {
       root.removeEventListener('mouseover', onHover);
       root.removeEventListener('mouseout', onHover);

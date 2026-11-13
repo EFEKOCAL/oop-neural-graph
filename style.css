@@ -2362,3 +2362,30 @@ pre .fill-in { display: inline-block; width: auto; min-width: 0; padding: 1px 6p
 .rp-note.k-mth { --nc: #fbbf24; --nc-soft: rgba(251, 191, 36, 0.12); }
 /* dar ekran: not, gövdenin üstünde kodun içinde; yatay kaydırmada sabit kalır */
 .rp-note-in { position: sticky; left: 0; width: min(520px, calc(100vw - 80px)); margin: 10px 0 6px; }
+
+/* Son gün tekrar sayfası (#/hizli/ozet) */
+.rp-rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.rp-rules .card { padding: 14px 16px; }
+.rp-rules ul { margin: 6px 0 0; }
+.rp-check li, .rp-rules li { margin: 4px 0; line-height: 1.5; }
+.rp-blank-table td:first-child { width: 68%; }
+@media print {
+  body.rp-summary { background: #fff !important; color: #000; }
+  body.rp-summary .sidebar, body.rp-summary .topbar, body.rp-summary .info-fab, body.rp-summary .info-panel,
+  body.rp-summary .scrim, body.rp-summary .no-print, body.rp-summary .rp-ann-side, body.rp-summary .rp-note-in { display: none !important; }
+  body.rp-summary .app, body.rp-summary .main, body.rp-summary .content { display: block; height: auto; overflow: visible; padding: 0; margin: 0; background: #fff; }
+  body.rp-summary .rapid { max-width: none; color: #000; }
+  body.rp-summary .card, body.rp-summary .table-wrap, body.rp-summary .l-code, body.rp-summary .rp-outbox pre { background: #fff !important; color: #000 !important; border-color: #999 !important; box-shadow: none !important; }
+  body.rp-summary .rp-ann.side { display: block; }
+  body.rp-summary .l-code .jl { min-width: 0; }
+  body.rp-summary [class^="jt-"] { color: #000 !important; }
+  body.rp-summary .jt-c { color: #555 !important; font-style: italic; }
+  body.rp-summary .jt-k { font-weight: 700; }
+  body.rp-summary code { background: #eee; color: #000; }
+  body.rp-summary .l-section { color: #000; break-after: avoid; }
+  body.rp-summary .card, body.rp-summary .rp-ann { break-inside: avoid; }
+  body.rp-summary .rp-head p, body.rp-summary td, body.rp-summary li { color: #000; }
+}
+@media print {
+  body.rp-summary .l-code, body.rp-summary .l-code .jl, body.rp-summary .rp-outbox pre { white-space: pre-wrap; overflow: visible; font-size: 10.5px; }
+}
