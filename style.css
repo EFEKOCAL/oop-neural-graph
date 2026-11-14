@@ -2,6 +2,9 @@
    OOP Interactive Lab (OS Interactive Lab temasından) — koyu tema "Control Center" arayüzü
    ========================================================================== */
 
+/* hidden özniteliği, display veren sınıf kurallarına (grid/flex) her zaman baskın gelsin */
+[hidden] { display: none !important; }
+
 :root {
   --bg: #090d15;
   --bg-2: #0d131f;

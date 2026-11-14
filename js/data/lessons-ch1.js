@@ -701,6 +701,36 @@
             ]
           },
           {
+            "t": "h",
+            "text": "Random ve nextInt: hangisi ne yapar?"
+          },
+          {
+            "t": "p",
+            "html": "İkisi ayrı şeylerdir. <code>Random</code> bir <b>sınıftır</b>: rastgele sayı üreten bir \"makine\"nin kalıbıdır. Kendi başına bir sayı vermez. Önce <code>new Random()</code> ile bu makineden bir <b>nesne</b> oluşturursun. <code>nextInt</code> ise o nesnenin bir <b>metodudur</b>: makineye \"bana bir sonraki rastgele <b>int</b>'i ver\" demektir. Adındaki <b>next</b> \"sıradaki\", <b>Int</b> ise dönen değerin türü olan <code>int</code> demektir. Aynı makineden <code>nextDouble</code> ile double, <code>nextBoolean</code> ile boolean da isteyebilirsin."
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "Random rand = new Random();      // 1) makineyi (nesneyi) oluştur\nint a = rand.nextInt();          // 2) herhangi bir int: negatif de olabilir\nint b = rand.nextInt(6);         // 3) 0, 1, 2, 3, 4 veya 5\nint zar = rand.nextInt(6) + 1;   // 4) 1..6 arası: zar"
+          },
+          {
+            "t": "table",
+            "head": ["Yazdığın", "Anlamı", "Çıkabilecek değerler"],
+            "rows": [
+              ["<code>Random</code>", "Sınıf (kalıp). Tek başına sayı üretmez.", "—"],
+              ["<code>new Random()</code>", "Bir üreteç nesnesi oluşturur.", "— (sayı değil, nesne)"],
+              ["<code>nextInt(6)</code>", "Tek başına yazılamaz: hangi nesnenin metodu olduğu belli değil (static değil).", "Derleme hatası"],
+              ["<code>rand.nextInt()</code>", "Parametresiz: hiçbir sınır yok.", "−2.147.483.648 … 2.147.483.647"],
+              ["<code>rand.nextInt(n)</code>", "Sınırlı: 0'dan başlar, n'yi <b>içermez</b>. n = kaç farklı sonuç olacağı.", "0 … n−1"],
+              ["<code>rand.nextInt(n) + 1</code>", "Aralığı 1 sağa kaydırır.", "1 … n"]
+            ]
+          },
+          {
+            "t": "note",
+            "kind": "why",
+            "html": "Neden <code>nextInt(7)</code> değil de <code>nextInt(6) + 1</code>? Zarın <b>6</b> yüzü var, yani 6 farklı sonuç lazım: <code>nextInt(6)</code> 0–5 verir, <code>+ 1</code> bunu 1–6'ya kaydırır. <code>nextInt(7)</code> ise 0–6 verir; <b>0</b> zar değeri değildir. Genel kalıp: <code>[min, max]</code> için <code>rand.nextInt(max - min + 1) + min</code>."
+          },
+          {
             "t": "p",
             "html": "<b>Aynı tohumla oluşturulan iki Random aynı sayı dizisini üretir.</b> Rastgelelik aslında deterministik bir formüldür. Slayttaki iki <code>new Random(3)</code> nesnesi <code>nextInt(1000)</code> ile ikisi de <code>734 660 210 581 128 202 549 564 459 961</code> yazar (javac ile doğrulandı)."
           },
