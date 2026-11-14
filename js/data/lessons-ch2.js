@@ -993,7 +993,7 @@
               "Hiçbiri"
             ],
             "answer": 1,
-            "a": "Object → Student downcast açık cast ister.",
+            "a": "Object → Student downcast açık cast ister. Derleyici <code>o</code>'nun bildirilen tipine (<code>Object</code>) bakar; her Object bir Student olmadığı için otomatik dönüştürmez. (1) upcast'tir, otomatiktir; (3) açık cast olduğu için derlenir.<br><b>Doğru yazım:</b> <code>Student s = (Student) o;</code><br><b>Daha güvenlisi:</b> <code>if (o instanceof Student) { Student s = (Student) o; }</code>. Böylece o gerçekte Student değilse çalışma zamanında <code>ClassCastException</code> almazsın.",
             "code": "Object o = new Student();   // (1)\nStudent s = o;              // (2)\nStudent t = (Student) o;    // (3)"
           },
           {
