@@ -74,12 +74,14 @@
       slide: 'Liang Bölüm 13 · 2022, 2024, 2025 vizeleri',
       topics: [
         ['Soyut sınıflar ve soyut metotlar', ['abstract-sinif', 'soyut-kurallar']],
+        ['Number ve Calendar (kütüphanedeki soyut sınıflar)', ['number-calendar']],
         ['Arayüzler ve kuralları', ['interface', 'arayuz-kurallar']],
         ['Soyut sınıf mı arayüz mü?', ['soyut-vs-arayuz']],
-        ['Comparable ve compareTo', ['comparable']],
-        ['Cloneable ve clone()', ['cloneable']]
+        ['Comparable ve compareTo', ['comparable', 'comparable-ornekler']],
+        ['Cloneable ve clone()', ['cloneable']],
+        ['Rational ve sınıf tasarımı', ['rational', 'sinif-tasarimi']]
       ],
-      concepts: ['abstract class', 'abstract method', 'soyut sınıfın yapıcısı', 'interface', 'implements', 'extends + implements sırası', 'public static final sabitler', 'imza çakışması', 'çoklu arayüz', 'Comparable', 'compareTo', 'Cloneable', 'marker interface', 'clone()', 'sığ / derin kopya']
+      concepts: ['abstract class', 'abstract method', 'soyut sınıfın yapıcısı', 'interface', 'implements', 'extends + implements sırası', 'public static final sabitler', 'imza çakışması', 'çoklu arayüz', 'Comparable', 'compareTo', 'Cloneable', 'marker interface', 'clone()', 'sığ / derin kopya', 'Number', 'GregorianCalendar', 'ay 0 tabanlı', 'wrapper compareTo', 'Rational', 'tutarlılık', 'iki kontrat', 'tek kök yok']
     },
     ch5: {
       slide: 'Hafta 8 · 2022, 2024, 2025 vizeleri',

@@ -324,6 +324,19 @@ public boolean equals(Object o) {
 <tr><td>İlişki</td><td>güçlü is-a</td><td>yetenek (Comparable, Edible)</td></tr></tbody></table>
 <p>İkisinden de <code>new</code> ile nesne oluşturulamaz. Bir sınıf <b>bir</b> sınıfı extend edebilir ama <b>birden çok</b> arayüzü implement edebilir.</p>`,
       keys: ['Soyut sınıfta her türlü alan, arayüzde sadece sabit', 'Soyut sınıfın yapıcısı var, arayüzün yok', 'Arayüz metotları public abstract', 'İkisinden de new ile nesne olmaz', 'Tek extends, çoklu implements']
+    },
+    {
+      id: 'e17', set: 'Soyut Sınıf ve Arayüz', src: 'exam', lesson: 'ch4/number-calendar', focus: 'Number|Calendar',
+      q: 'Java kütüphanesindeki soyut sınıflara iki örnek veriniz. Number neden soyuttur? <code>new GregorianCalendar(2026, 10, 17)</code> hangi tarihi gösterir?',
+      a: `<p><b>Number</b>: Integer, Double, BigInteger, BigDecimal... sınıflarının soyut üst sınıfı. <code>intValue, longValue, floatValue, doubleValue</code> soyuttur çünkü dönüşümü her sayı türü farklı yapar. Kazanç: <code>ArrayList&lt;Number&gt;</code> içinde karışık sayılar <code>doubleValue()</code> ile karşılaştırılabilir.</p>
+<p><b>Calendar</b>: Date'ten yıl/ay/gün ayıklayan soyut sınıf; somut alt sınıfı <b>GregorianCalendar</b>. Ay <b>0 tabanlı</b> → 10 = <b>17 Kasım 2026</b>. Bilgi <code>get(Calendar.YEAR)</code> gibi sabitlerle alınır.</p>`,
+      keys: ['Number soyut üst sınıf', 'xxxValue metotları soyut', 'Calendar soyut, GregorianCalendar somut', 'Ay 0 tabanlı', 'get(Calendar.SABIT)']
+    },
+    {
+      id: 'e18', set: 'Soyut Sınıf ve Arayüz', src: 'exam', lesson: 'ch4/sinif-tasarimi', focus: 'tasarım|cohesion|kontrat',
+      q: 'Slide04\'teki sınıf tasarım yönergelerinden en az beşini örnekleriyle yazınız.',
+      a: `<ul><li><b>Tutarlılık:</b> sınıf tek varlık (öğrenci ve personel aynı sınıfta olmaz).</li><li><b>Sorumlulukları ayır:</b> String / StringBuilder / StringBuffer.</li><li><b>Yeniden kullanım:</b> kullanıcıya kısıt koyma, metotlar çağrı sırasından bağımsız.</li><li><b>No-arg yapıcı</b>, equals ve toString override.</li><li><b>Adlandırma ve düzen:</b> alanlar → yapıcılar → metotlar.</li><li><b>İki kontrat:</b> kullanıcılar için private alan + public erişimci; genişleticiler için protected.</li><li><b>Gizleme:</b> private veri, get/set; iç metotlar da private (Rational.gcd).</li><li><b>static:</b> tüm örneklerce paylaşılan özellik.</li></ul>`,
+      keys: ['Tutarlılık', 'Sorumlulukları ayırma', 'Yeniden kullanım', 'No-arg yapıcı + equals/toString', 'Kullanıcı ve genişletici kontratı', 'private + get/set', 'static paylaşılan özellik']
     }
   ];
 })(window.OOPLab = window.OOPLab || {});
