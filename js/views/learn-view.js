@@ -685,7 +685,7 @@
         <h2 class="fx-title">${l.title}</h2>
         <p class="fx-sub">${l.en} · ${lessonSource(l)} · ~${l.minutes} dk</p>
         ${questionsFor(key).length ? `<p class="tq-lesson">★ Bu derste <b>${questionsFor(key).length} sınav sorusu</b> var. İlgili kartlarda sarı uyarı kutusu çıkar.</p>` : ''}
-        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.prose ? `<p>${String(pre.text).replace(/⟦\d+⟧/g, '____')}</p>` : ''}${pre.code && (pre.type === 'mc' || pre.type === 'fill') ? javaLines(pre.type === 'fill' ? pre.code.replace(/⟦\d+⟧/g, '____') : pre.code) : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
+        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.prose ? `<p>${String(pre.text).replace(/⟦\d+⟧/g, '____')}</p>` : ''}${pre.code && (pre.type === 'mc' || pre.type === 'fill') ? javaLines(pre.type === 'fill' ? pre.code.replace(/⟦\d+⟧/g, '____') : pre.code) : ''}${pre.type === 'mc' && pre.options ? `<ol class="fx-pre-opts">${pre.options.map((o, j) => `<li><span class="mc-l">${'ABCDEF'[j]}</span><span>${o}</span></li>`).join('')}</ol>` : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
     } else if (card.kind === 'check') {
       const c = card.check;
       const id = `${key}#${card.n}`;

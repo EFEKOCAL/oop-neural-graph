@@ -537,6 +537,10 @@
             "html": "Bir catch, belirttiği sınıfı <b>ve tüm alt sınıflarını</b> yakalar. Bu yüzden <b>alt sınıf (özel) önce, üst sınıf (genel) sonra</b> yazılmalıdır. Üst sınıfı önce yazarsan alttaki catch'e asla ulaşılamaz → <b>derleme hatası</b>."
           },
           {
+            "t": "dg",
+            "id": "exception-tree"
+          },
+          {
             "t": "h",
             "text": "Java 7: çoklu yakalama"
           },

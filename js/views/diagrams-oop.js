@@ -90,6 +90,81 @@
       draw();
     }
   });
+  // İstisna sınıf ağacı: bir sınıfa tıkla → catch (O e) neleri yakalar (kendisi + tüm alt sınıflar yanar),
+  // üst sınıflar yakalanmaz (kırmızı kesik çizgi). Sıralama kuralını görsel olarak anlatır (Slide03 s.18).
+  // [ad, etiket('c' checked / 'u' unchecked / ''), çocuklar]
+  const XTREE = ['Throwable', '', [
+    ['Error', 'u', [
+      ['VirtualMachineError', '', [['OutOfMemoryError', '', []], ['StackOverflowError', '', []]]]
+    ]],
+    ['Exception', 'c', [
+      ['IOException', 'c', [['FileNotFoundException', '', []], ['EOFException', '', []]]],
+      ['ClassNotFoundException', 'c', []],
+      ['RuntimeException', 'u', [
+        ['ArithmeticException', '', []],
+        ['NullPointerException', '', []],
+        ['ClassCastException', '', []],
+        ['IndexOutOfBoundsException', '', [['ArrayIndexOutOfBoundsException', '', []], ['StringIndexOutOfBoundsException', '', []]]],
+        ['IllegalArgumentException', '', [['NumberFormatException', '', []]]],
+        ['NoSuchElementException', '', [['InputMismatchException', '', []]]]
+      ]]
+    ]]
+  ]];
+
+  reg('exception-tree', {
+    kind: 'custom',
+    render() {
+      const tag = { c: '<i class="xt-t c">checked</i>', u: '<i class="xt-t u">unchecked</i>' };
+      const li = ([n, t, kids]) => `<li data-n="${n}"><button class="xt-n" type="button" data-n="${n}">${n}</button>${tag[t] || ''}${kids.length ? `<ul>${kids.map(li).join('')}</ul>` : ''}</li>`;
+      return `<figure class="dg xt" data-dg="exception-tree">
+        <div class="xt-code"><code data-v="code">catch (<b>?</b> e) { ... }</code></div>
+        <div class="xt-wrap"><ul class="xt-root">${li(XTREE)}</ul></div>
+        <div class="xt-legend"><span><i class="xt-sw hit"></i>seçilen catch</span><span><i class="xt-sw sub"></i>bu da yakalanır (alt sınıf)</span><span><i class="xt-sw up"></i>yakalanmaz (üst sınıf)</span></div>
+        <figcaption class="dg-caption"></figcaption>
+      </figure>`;
+    },
+    init(el) {
+      const cap = el.querySelector('.dg-caption');
+      const code = el.querySelector('[data-v="code"]');
+      const names = (li) => [...li.querySelectorAll('li')].map((x) => x.dataset.n);
+      const reset = () => {
+        el.classList.remove('on');
+        el.querySelectorAll('.hit,.sub,.up,.lit').forEach((x) => x.classList.remove('hit', 'sub', 'up', 'lit'));
+      };
+      const pick = (n) => {
+        reset();
+        const li = el.querySelector(`li[data-n="${n}"]`);
+        el.classList.add('on');
+        li.classList.add('lit');
+        li.querySelector(':scope > .xt-n').classList.add('hit');
+        li.querySelectorAll('li').forEach((x) => { x.classList.add('lit'); x.querySelector(':scope > .xt-n').classList.add('sub'); });
+        const ups = [];
+        for (let p = li.parentElement.closest('li'); p && el.contains(p); p = p.parentElement.closest('li')) {
+          p.querySelector(':scope > .xt-n').classList.add('up');
+          ups.push(p.dataset.n);
+        }
+        const subs = names(li);
+        code.innerHTML = `catch (<b>${n}</b> e) { ... }`;
+        let msg = `<code>catch (${n} e)</code> → <b>${subs.length + 1} sınıfı</b> yakalar: <b>${n}</b>${subs.length ? ` ve tüm alt sınıfları (${subs.join(', ')})` : ' (alt sınıfı yok, sadece kendisi)'}.`;
+        if (ups.length) msg += `<br>Üst sınıflar (<b>${ups.join(' ← ')}</b>) <b>yakalanmaz</b>: Örneğin <code>new ${ups[0]}()</code> fırlatılırsa bu catch'ten geçip gider.`;
+        msg += subs.length
+          ? `<br><b>Sıralama:</b> <code>catch (${subs[0]} e)</code> gibi bir alt sınıf catch'i bundan <b>önce</b> yazılmalı. Sonra yazılırsa ona asla ulaşılamaz → <b>derleme hatası</b>.`
+          : `<br><b>Sıralama:</b> En özel sınıf olduğu için catch listesinde en üste yazılabilir.`;
+        if (n === 'Throwable') msg += '<br>Dikkat: <code>Error</code> türlerini de yakalar. Bu iyi bir uygulama sayılmaz.';
+        cap.className = 'dg-caption';
+        cap.innerHTML = msg;
+      };
+      el.querySelector('.xt-wrap').addEventListener('click', (ev) => {
+        const b = ev.target.closest('.xt-n');
+        if (!b) return;
+        if (b.classList.contains('hit')) { reset(); code.innerHTML = 'catch (<b>?</b> e) { ... }'; cap.innerHTML = 'Bir sınıfa tıkla: o catch nelerin yakalanacağını gösterir.'; return; }
+        pick(b.dataset.n);
+      });
+      code.innerHTML = 'catch (<b>?</b> e) { ... }';
+      cap.innerHTML = 'Bir sınıfa tıkla: <code>catch (O_sınıf e)</code> o sınıfı ve <b>tüm alt sınıflarını</b> yakalar, üst sınıflarını yakalamaz. Aynı sınıfa tekrar tıklarsan seçim kalkar.';
+    }
+  });
+
   // Vize sayacı: 80 dk, bitiş zamanı tarayıcıda saklanır (sayfa değişse de sayım sürer).
   // Her sınav formatı için ayrı önerilen süre dağılımı (plan)
   const TKEY = 'ooplab.timer.v1';
