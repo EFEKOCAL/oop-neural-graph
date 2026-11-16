@@ -87,7 +87,8 @@
           const first = pre.querySelector('.jl.on');
           if (!first) return;
           if (pre.scrollHeight > pre.clientHeight + 1) {
-            pre.scrollTop = Math.max(0, first.offsetTop - pre.clientHeight / 3);
+            // offsetTop pre'ye değil konumlu ataya göredir; kaymayı ekran konumlarından hesapla
+            pre.scrollTop = Math.max(0, pre.scrollTop + first.getBoundingClientRect().top - pre.getBoundingClientRect().top - pre.clientHeight / 3);
             return;
           }
           const card = follow && el.closest('.fx-card');
@@ -104,20 +105,54 @@
         });
         const cons = el.querySelector('.jt-console pre');
 
-        // Ders kartında kod ve konsol hiç kısaltılmaz (CSS: .fx-card .jt-code max-height:none). Sığmayan
-        // örnekte kart aşağı kaydırılır. En uzun dosya + son adım (en dolu konsol/değişkenler) hâlindeki
-        // yükseklik ölçülür; kart sabitlenirken (learn-view pinCard) buna yer bırakılır ki taşmasın.
+        // Ders kartında (.fx-card) kod kutusu ekranın kalan yüksekliği kadar büyür: kod sığıyorsa tamamı
+        // görünür; sığmıyorsa yalnızca kod alanı kendi içinde kayar, konsol çıktısı tam ve ekranda kalır.
+        // En uzun dosya + son adım (en dolu konsol/değişkenler) hâli ölçülür ki adım ilerledikçe kart
+        // taşmasın; bu yükseklik kart sabitlenirken (learn-view pinCard) de ayrılır.
         const longest = files.reduce((b, f, k) => (trim(f.code).split('\n').length > trim(files[b].code).split('\n').length ? k : b), 0);
-        const measure = () => {
+        // states: şeklin her adımını sırayla kuran fonksiyonlar; her birinde kod dışındaki kısımların
+        // (açıklama, değişkenler, konsol) yüksekliği ölçülür, en yükseği esas alınır.
+        const measure = (states) => {
           const card = el.closest('.fx-card');
           if (!card || !card.clientHeight) return;
+          const inner = card.firstElementChild;
+          const h = (x) => x.getBoundingClientRect().height;
+          pre.style.maxHeight = 'none';
+          if (cons) cons.style.maxHeight = 'none';
+          // her adım için: kod dışı yükseklik (c) ve bunun içindeki konsol yüksekliği (k)
+          const S = states.map((set) => {
+            set();
+            return { c: h(inner) - h(pre), k: cons ? h(cons) : 0 };
+          });
+          const chrome = Math.max(...S.map((s) => s.c));
           show(longest, []);
-          card._jtWorst = Math.max(card._jtWorst || 0, card.firstElementChild.getBoundingClientRect().height);
+          const code = h(pre);
+          const cs = getComputedStyle(card);
+          const avail = card.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+          const MIN = 160;
+          let over = chrome + code - avail;
+          let preH = code;
+          if (over > 0) {
+            preH = Math.max(MIN, code - over);
+            pre.style.maxHeight = `${preH}px`;
+            over -= code - preH;
+          }
+          // Kod en küçük hâline indiği hâlde sığmıyorsa (çok uzun konsol, küçük ekran) konsol da kısalır:
+          // sınır, taşan her adımda konsolun alabileceği en büyük yükseklikten seçilir.
+          let cap = Infinity;
+          if (over > 0 && cons) {
+            const limit = avail - preH;
+            S.forEach((s) => { if (s.c > limit) cap = Math.min(cap, limit - (s.c - s.k)); });
+            cap = Math.max(120, cap);
+            cons.style.maxHeight = `${cap}px`;
+          }
+          const worst = Math.max(...S.map((s) => s.c - s.k + Math.min(s.k, cap)));
+          card._jtWorst = Math.max(card._jtWorst || 0, worst + preH);
         };
 
         if (!steps.length) {
           if (cons) cons.innerHTML = fmtOut(def.output);
-          el._jtFit = () => { measure(); show(0, def.hl); };
+          el._jtFit = () => { measure([() => {}]); show(0, def.hl); };
           show(0, def.hl);
           return;
         }
@@ -178,9 +213,7 @@
         });
         el._jtFit = () => {
           const saved = i;
-          i = steps.length - 1;
-          apply();
-          measure();
+          measure([-1, ...steps.keys()].map((k) => () => { i = k; apply(); }));
           i = saved;
           apply();
         };

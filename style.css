@@ -1992,8 +1992,9 @@ a.src-web:hover { text-decoration: underline; }
 .jt-dock > .dg-ctrl, .jt-dock > .dg-caption, .dg.jt > .jt-vars { margin-left: 12px; margin-right: 12px; }
 .jt-dock > .dg-caption { margin-bottom: 4px; }
 .jt-dock { padding-bottom: 1px; background: var(--bg-2); }
-/* Ders kartında kod ve konsol hiç kısaltılmaz: sığan örnek tek ekranda tam görünür, sığmayanda kart
-   aşağı kaydırılır. Uzun kodda İleri/Geri ve adım açıklaması ekranın altına yapışık kalır
+/* Ders kartında kod kutusu ekranın kalan yüksekliğine göre JS ile boyutlanır (java.js measure):
+   sığan kod tam görünür, sığmayanda yalnızca kod alanı kayar ve konsol ekranda kalır. Kart yine de
+   taşarsa (çok küçük ekran) İleri/Geri ve adım açıklaması alta yapışık kalır
    (overflow:clip, hidden'ın aksine sticky'yi bozmaz). */
 .fx-card .dg.jt { overflow: clip; }
 .dg.jt .jt-code, .dg.jt .jt-console pre { max-height: none; }
