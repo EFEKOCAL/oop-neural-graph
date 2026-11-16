@@ -1207,7 +1207,11 @@
     root.innerHTML = `<div class="learn${focus ? ' learn-focus' : ''}">${html}</div>`;
     OOPLab.diagrams.init(root);
     OOPLab.app.setHeader(header);
-    if (l) startFeed(ch, l, b3);
+    if (l) {
+      fitCode();
+      startFeed(ch, l, b3);
+      if (document.fonts) document.fonts.ready.then(() => { if (root) fitCode(); });
+    }
 
     if (a === 'sorular' && b2 && Q.mode === 'list') {
       const el = root.querySelector(`#q-${CSS.escape(b2)}`);
@@ -1237,7 +1241,13 @@
     inner.dataset.pinned = '1';
   }
 
-  // Pencere boyutu değişince ortalama yeniden hesaplansın
+  // Kod şekilleri kartın tüm yüksekliğini kullansın (bkz. OOPLab.java.fitIn)
+  function fitCode() {
+    if (root && OOPLab.java && OOPLab.java.fitIn) OOPLab.java.fitIn(root);
+  }
+
+  // Pencere boyutu değişince ortalama ve kod yüksekliği yeniden hesaplansın
+  let fitRaf = 0;
   function unpinCards() {
     if (!root) return;
     root.querySelectorAll('.fx-inner[data-pinned]').forEach((x) => {
@@ -1245,6 +1255,8 @@
       x.style.marginBottom = '';
       delete x.dataset.pinned;
     });
+    cancelAnimationFrame(fitRaf);
+    fitRaf = requestAnimationFrame(fitCode);
   }
 
   function mount(container, p) {

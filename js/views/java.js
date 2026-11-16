@@ -90,9 +90,33 @@
           if (t) show(Number(t.dataset.file), Number(t.dataset.file) === 0 ? def.hl : files[t.dataset.file].hl);
         });
         const cons = el.querySelector('.jt-console pre');
+
+        // Ders kartında (.fx-card) kod ve konsol ekranın kalan yüksekliğini kullanır: sığıyorsa tamamı
+        // görünür, sığmıyorsa yalnızca taşan kadar kısaltılır (iç kaydırma). En uzun dosya ve son adımın
+        // durumu (en dolu konsol/değişkenler) ölçülür ki adım ilerledikçe kart taşmasın.
+        const longest = files.reduce((b, f, k) => (trim(f.code).split('\n').length > trim(files[b].code).split('\n').length ? k : b), 0);
+        const measure = () => {
+          const card = el.closest('.fx-card');
+          if (!card || !card.clientHeight) return;
+          pre.style.maxHeight = 'none';
+          if (cons) cons.style.maxHeight = 'none';
+          show(longest, []);
+          const cs = getComputedStyle(card);
+          const avail = card.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+          let over = card.firstElementChild.getBoundingClientRect().height - avail;
+          if (over > 0) {
+            const ph = pre.offsetHeight;
+            const np = Math.max(240, ph - over);
+            pre.style.maxHeight = `${np}px`;
+            over -= ph - np;
+          }
+          if (over > 0 && cons) cons.style.maxHeight = `${Math.max(90, cons.offsetHeight - over)}px`;
+        };
+
         if (!steps.length) {
-          show(0, def.hl);
           if (cons) cons.innerHTML = fmtOut(def.output);
+          el._jtFit = () => { measure(); show(0, def.hl); };
+          show(0, def.hl);
           return;
         }
 
@@ -150,10 +174,24 @@
           }
           apply();
         });
+        el._jtFit = () => {
+          const saved = i;
+          i = steps.length - 1;
+          apply();
+          measure();
+          i = saved;
+          apply();
+        };
         apply();
       }
     });
   }
 
-  OOPLab.java = { highlight, lines, trace, esc };
+  /** Kapsamdaki ders kartı kod şekillerini ekran yüksekliğine göre boyutlandırır. */
+  function fitIn(scope) {
+    if (!scope) return;
+    scope.querySelectorAll('.fx-card .dg.jt').forEach((e) => { if (e._jtFit) e._jtFit(); });
+  }
+
+  OOPLab.java = { highlight, lines, trace, esc, fitIn };
 })(window.OOPLab = window.OOPLab || {});
