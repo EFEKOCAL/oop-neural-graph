@@ -71,46 +71,48 @@
         return `<figure class="dg jt" data-dg="${id}">
           <div class="jt-tabs">${files.map((f, i) => `<button type="button" class="jt-tab${i === 0 ? ' active' : ''}" data-file="${i}">${esc(f.name)}</button>`).join('')}</div>
           <pre class="jt-code"></pre>
-          ${steps.length ? `<div class="dg-ctrl"><button class="btn btn-sm" type="button" data-act="prev">◀ Geri</button><span class="dg-count"></span><button class="btn btn-sm btn-primary" type="button" data-act="next">İleri ▶</button><button class="btn btn-sm btn-ghost" type="button" data-act="play">⏵ Otomatik</button><button class="btn btn-sm btn-ghost" type="button" data-act="reset" title="Başa al">↺</button></div>
-          <figcaption class="dg-caption"></figcaption>
+          ${steps.length ? `<div class="jt-dock"><div class="dg-ctrl"><button class="btn btn-sm" type="button" data-act="prev">◀ Geri</button><span class="dg-count"></span><button class="btn btn-sm btn-primary" type="button" data-act="next">İleri ▶</button><button class="btn btn-sm btn-ghost" type="button" data-act="play">⏵ Otomatik</button><button class="btn btn-sm btn-ghost" type="button" data-act="reset" title="Başa al">↺</button></div>
+          <figcaption class="dg-caption"></figcaption></div>
           <div class="jt-vars"></div>` : ''}
           ${hasOut ? '<div class="jt-console"><span class="jt-console-h">Konsol çıktısı</span><pre></pre></div>' : ''}
         </figure>`;
       },
       init(el) {
         const pre = el.querySelector('.jt-code');
-        const show = (fi, hl) => {
+        // follow: kullanıcı adım/sekme değiştirdiyse vurgulanan satırı görünür tut. Ders kartında (.fx-card)
+        // kodun iç kaydırması yoktur (tamamı görünür); satır ekran dışındaysa kartın kendisi kaydırılır.
+        const show = (fi, hl, follow) => {
           el.querySelectorAll('.jt-tab').forEach((t) => t.classList.toggle('active', Number(t.dataset.file) === fi));
           pre.innerHTML = lines(files[fi].code, hl);
           const first = pre.querySelector('.jl.on');
-          if (first) pre.scrollTop = Math.max(0, first.offsetTop - pre.clientHeight / 3);
+          if (!first) return;
+          if (pre.scrollHeight > pre.clientHeight + 1) {
+            pre.scrollTop = Math.max(0, first.offsetTop - pre.clientHeight / 3);
+            return;
+          }
+          const card = follow && el.closest('.fx-card');
+          if (!card) return;
+          const cr = card.getBoundingClientRect();
+          const lr = first.getBoundingClientRect();
+          const dock = el.querySelector('.jt-dock');
+          const bottom = cr.bottom - 84 - (dock ? dock.offsetHeight : 0);  // alt gezinme düğmeleri + yapışık kontrol paneli
+          if (lr.top < cr.top + 16 || lr.bottom > bottom) card.scrollTop += lr.top - cr.top - (bottom - cr.top) / 3;
         };
         el.querySelector('.jt-tabs').addEventListener('click', (ev) => {
           const t = ev.target.closest('[data-file]');
-          if (t) show(Number(t.dataset.file), Number(t.dataset.file) === 0 ? def.hl : files[t.dataset.file].hl);
+          if (t) show(Number(t.dataset.file), Number(t.dataset.file) === 0 ? def.hl : files[t.dataset.file].hl, true);
         });
         const cons = el.querySelector('.jt-console pre');
 
-        // Ders kartında (.fx-card) kod ve konsol ekranın kalan yüksekliğini kullanır: sığıyorsa tamamı
-        // görünür, sığmıyorsa yalnızca taşan kadar kısaltılır (iç kaydırma). En uzun dosya ve son adımın
-        // durumu (en dolu konsol/değişkenler) ölçülür ki adım ilerledikçe kart taşmasın.
+        // Ders kartında kod ve konsol hiç kısaltılmaz (CSS: .fx-card .jt-code max-height:none). Sığmayan
+        // örnekte kart aşağı kaydırılır. En uzun dosya + son adım (en dolu konsol/değişkenler) hâlindeki
+        // yükseklik ölçülür; kart sabitlenirken (learn-view pinCard) buna yer bırakılır ki taşmasın.
         const longest = files.reduce((b, f, k) => (trim(f.code).split('\n').length > trim(files[b].code).split('\n').length ? k : b), 0);
         const measure = () => {
           const card = el.closest('.fx-card');
           if (!card || !card.clientHeight) return;
-          pre.style.maxHeight = 'none';
-          if (cons) cons.style.maxHeight = 'none';
           show(longest, []);
-          const cs = getComputedStyle(card);
-          const avail = card.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-          let over = card.firstElementChild.getBoundingClientRect().height - avail;
-          if (over > 0) {
-            const ph = pre.offsetHeight;
-            const np = Math.max(240, ph - over);
-            pre.style.maxHeight = `${np}px`;
-            over -= ph - np;
-          }
-          if (over > 0 && cons) cons.style.maxHeight = `${Math.max(90, cons.offsetHeight - over)}px`;
+          card._jtWorst = Math.max(card._jtWorst || 0, card.firstElementChild.getBoundingClientRect().height);
         };
 
         if (!steps.length) {
@@ -128,19 +130,19 @@
         const playBtn = el.querySelector('[data-act="play"]');
         const fileOf = (s) => (s.file == null ? 0 : typeof s.file === 'number' ? s.file : Math.max(0, files.findIndex((f) => f.name === s.file)));
 
-        const apply = () => {
+        const apply = (follow) => {
           count.textContent = `${i + 1} / ${steps.length}`;
           el.querySelector('[data-act="prev"]').disabled = i < 0;
           el.querySelector('[data-act="next"]').disabled = i >= steps.length - 1;
           if (i < 0) {
-            show(0, def.hl);
+            show(0, def.hl, follow);
             cap.innerHTML = def.intro || '<b>İleri</b> ile programı satır satır yürüt: vurgulanan satırı, değişkenleri ve konsolu izle.';
             vars.innerHTML = '';
             if (cons) cons.innerHTML = '';
             return;
           }
           const s = steps[i];
-          show(fileOf(s), s.lines);
+          show(fileOf(s), s.lines, follow);
           cap.innerHTML = s.note || '';
           const prev = i > 0 ? steps[i - 1].vars || {} : {};
           const v = s.vars || {};
@@ -167,12 +169,12 @@
               timer = setInterval(() => {
                 if (!el.isConnected || i >= steps.length - 1) { stop(); return; }
                 i++;
-                apply();
+                apply(true);
               }, 2400);
               i++;
             }
           }
-          apply();
+          apply(true);
         });
         el._jtFit = () => {
           const saved = i;
@@ -190,6 +192,7 @@
   /** Kapsamdaki ders kartı kod şekillerini ekran yüksekliğine göre boyutlandırır. */
   function fitIn(scope) {
     if (!scope) return;
+    scope.querySelectorAll('.fx-card').forEach((c) => { c._jtWorst = 0; });
     scope.querySelectorAll('.fx-card .dg.jt').forEach((e) => { if (e._jtFit) e._jtFit(); });
   }
 

@@ -1235,7 +1235,10 @@
     const inner = e.target.closest('.fx-card > .fx-inner');
     if (!inner || inner.dataset.pinned) return;
     const card = inner.parentElement;
-    const top = inner.getBoundingClientRect().top - card.getBoundingClientRect().top + card.scrollTop - parseFloat(getComputedStyle(card).paddingTop);
+    const cs = getComputedStyle(card);
+    let top = inner.getBoundingClientRect().top - card.getBoundingClientRect().top + card.scrollTop - parseFloat(cs.paddingTop);
+    // Kod şekli daha uzun sekmeye/son adıma geçince taşmasın: en dolu hâline yer bırak
+    if (card._jtWorst) top = Math.min(top, card.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - card._jtWorst);
     inner.style.marginTop = `${Math.max(0, top)}px`;
     inner.style.marginBottom = '0';
     inner.dataset.pinned = '1';
