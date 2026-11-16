@@ -463,8 +463,13 @@
               "Tüm (soyut) <b>metotları</b> otomatik olarak <code>public abstract</code>'tır. (Java 8+ <code>default</code> ve <code>static</code> gövdeli metotlara da izin verir.)",
               "Bir sınıf arayüzü <b><code>implements</code></b> ile uygular ve tüm soyut metotlarını yazmak zorundadır.",
               "Bir sınıf <b>yalnızca bir</b> sınıfı extend edebilir ama <b>birden çok</b> arayüzü implement edebilir: <code>class Tavuk extends Hayvan implements Yenilebilir, Comparable&lt;Tavuk&gt;</code>",
-              "Arayüz bir <b>tiptir</b>: <code>Yenilebilir y = new Tavuk();</code> ve <code>x instanceof Yenilebilir</code> geçerlidir."
+              "Arayüz bir <b>tiptir</b>; iki yerde kullanılır: <b>değişken tipi</b> olarak (<code>Yenilebilir y = new Tavuk();</code>) ve <b>instanceof kontrolünde</b> (<code>x instanceof Yenilebilir</code>). Sıradaki örnekte <code>x</code> ile <code>y</code>'nin ilişkisi görülüyor."
             ]
+          },
+          {
+            "t": "code",
+            "lang": "java",
+            "text": "Yenilebilir y = new Tavuk();     // 1) Değişken tipi: y yalnızca Yenilebilir'in metotlarını görür\n// y instanceof Yenilebilir      → hep true; y'nin tipi zaten Yenilebilir, bilgi vermez\n\nHayvan x = new Tavuk();          // 2) Daha GENEL tipte bir referans\nSystem.out.println(x instanceof Yenilebilir);   // true: Tavuk, Yenilebilir'i implement ediyor\n\nHayvan z = new Kaplan();         // Kaplan, Yenilebilir'i implement etmiyor\nSystem.out.println(z instanceof Yenilebilir);   // false\n\n// x ile y'yi birleştiren kalıp (Java 16+ pattern matching):\nif (x instanceof Yenilebilir yen) {   // kontrol geçerse AYNI nesne Yenilebilir olarak kullanılır\n    System.out.println(yen.nasilYenir());\n}"
           },
           {
             "t": "p",
