@@ -175,13 +175,15 @@
     'exam-timer-2022': [['S1 Boşluk', 3], ['S2 D/Y', 6], ['S3 Çıktı', 8], ['S4 Hata', 5], ['S5 Tasarım (45p)', 36], ['S6 ArrayList + istisna (25p)', 22]],
     'exam-timer-karma': [['S1 Boşluk', 6], ['S2 D/Y', 6], ['S3 Çıktı', 10], ['S4 Hata', 12], ['S5 İskelet (40p)', 38], ['S6 Çıktı', 8]]
   };
-  Object.keys(PLANS).forEach((key) => reg(key, timerDiagram(PLANS[key])));
+  Object.keys(PLANS).forEach((key) => reg(key, timerDiagram(key, PLANS[key])));
 
-  function timerDiagram(PLAN) {
+  // data-dg her plan için kendi anahtarı olmalı: hepsi 'exam-timer' olunca diagrams.init 6-7 bölümlü
+  // planı 5 bölümlü init ile başlatıyor, tick() PLAN[5]'te her 500 ms hata atıyordu.
+  function timerDiagram(key, PLAN) {
     return {
       kind: 'custom',
       render() {
-        return `<figure class="dg" data-dg="exam-timer">
+        return `<figure class="dg" data-dg="${key}">
           <div class="tm"><span class="tm-clock">80:00</span>
             <div class="btn-row"><button class="btn btn-primary btn-sm" type="button" data-t="start">▶ Başlat</button><button class="btn btn-sm" type="button" data-t="pause">⏸ Duraklat</button><button class="btn btn-sm btn-ghost" type="button" data-t="reset">↺ Sıfırla</button></div>
             <div class="tm-plan">${PLAN.map(([t, m]) => `<span style="--w:${m}">${t}<br><b>${m} dk</b></span>`).join('')}</div>
