@@ -171,6 +171,14 @@
   const hlBlanks = (src) => String(src).replace(/^\n+|\s+$/g, '').split(/⟦(\d+)⟧/)
     .map((p, i) => (i % 2 === 0 ? OOPLab.java.highlight(p) : `⟦${p}⟧`)).join('');
 
+  // "Okumadan önce düşün" kutusunda gösterilecek kod: sorunun türüne göre ilgili alan (cevabı açık etmeden)
+  function preCode(c) {
+    if (c.type === 'write') return c.given || '';
+    if (c.type === 'fill') return c.code ? c.code.replace(/⟦\d+⟧/g, '____') : '';
+    if (c.type === 'skeleton') return c.code ? c.code.replace(/⟦(\d+)⟧/g, (_, d) => `[B${Number(d) + 1}]`) : '';
+    return c.code || '';
+  }
+
   function checkInner(c, id, st) {
     const q = c.q;
     if (c.type === 'mc') {
@@ -685,7 +693,7 @@
         <h2 class="fx-title">${l.title}</h2>
         <p class="fx-sub">${l.en} · ${lessonSource(l)} · ~${l.minutes} dk</p>
         ${questionsFor(key).length ? `<p class="tq-lesson">★ Bu derste <b>${questionsFor(key).length} sınav sorusu</b> var. İlgili kartlarda sarı uyarı kutusu çıkar.</p>` : ''}
-        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.prose ? `<p>${String(pre.text).replace(/⟦\d+⟧/g, '____')}</p>` : ''}${pre.code && (pre.type === 'mc' || pre.type === 'fill') ? javaLines(pre.type === 'fill' ? pre.code.replace(/⟦\d+⟧/g, '____') : pre.code) : ''}${pre.type === 'mc' && pre.options ? `<ol class="fx-pre-opts">${pre.options.map((o, j) => `<li><span class="mc-l">${'ABCDEF'[j]}</span><span>${o}</span></li>`).join('')}</ol>` : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
+        ${pre ? `<div class="fx-pre"><span class="l-note-label">Okumadan önce düşün</span><p>${pre.q}</p>${pre.prose ? `<p>${String(pre.text).replace(/⟦\d+⟧/g, '____')}</p>` : ''}${preCode(pre) ? javaLines(preCode(pre)) : ''}${pre.type === 'mc' && pre.options ? `<ol class="fx-pre-opts">${pre.options.map((o, j) => `<li><span class="mc-l">${'ABCDEF'[j]}</span><span>${o}</span></li>`).join('')}</ol>` : ''}<small>Bilmiyorsan da tahmin et. Ders sonunda kontrol edeceksin.</small></div>` : ''}`;
     } else if (card.kind === 'check') {
       const c = card.check;
       const id = `${key}#${card.n}`;
