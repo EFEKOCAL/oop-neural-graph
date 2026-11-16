@@ -111,15 +111,15 @@
         "checks": [
           {
             "type": "mc",
-            "q": "2025-26 vizesinde 40 puanlık soru hangi biçimdeydi?",
+            "q": "Yönetici sınıf ArrayList<Device>'a bir nesne eklerken \"sadece Controllable olan cihazlar eklenebilir\" kuralını nasıl uygularsın?",
             "options": [
-              "Sıfırdan sınıf tasarımı",
-              "Kod iskeletindeki [B1]–[B21] bloklarını doldurma",
-              "Çoktan seçmeli",
-              "Sadece çıktı yazma"
+              "Device'a Controllable türünde bir alan eklerim",
+              "Eklemeden önce if (d instanceof Controllable) ile kontrol ederim",
+              "Listeyi ArrayList<Object> yaparım",
+              "Kontrol gerekmez, derleyici zaten engeller"
             ],
             "answer": 1,
-            "a": "Hoca 2025'te iskelet tamamlamaya geçti; önceki yıllarda sıfırdan tasarlattı. İkisine de hazırlan."
+            "a": "Liste üst tip (Device) tuttuğu için derleyici arayüzü bilemez; çalışma anında instanceof ile tip kontrolü yapılır. Bu iş kuralı 40 puanlık soruda neredeyse her yıl var."
           }
         ]
       },
