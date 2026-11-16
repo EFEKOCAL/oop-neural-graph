@@ -554,7 +554,7 @@
               "Sınıf <b>tek</b> sınıftan <code>extends</code>, <b>birden çok</b> arayüzden <code>implements</code>. Sıra: <b>önce extends, sonra implements</b>: <code>class Light extends Device implements Controllable</code>",
               "Arayüz başka arayüzleri <code>extends</code> ile genişletir (birden çok olabilir): <code>interface A extends B, C</code>",
               "İki arayüz <b>aynı imzalı ama farklı dönüş tipli</b> metot içerirse ikisini birden uygulayan sınıf yazılamaz → <b>derleme hatası</b>. Dönüş tipi de aynıysa tek gövde ikisini de karşılar.",
-              "<code>instanceof</code> arayüzle de çalışır: <code>cihaz instanceof Controllable</code>. Hocanın \"sadece kontrol edilebilir cihazları listeye ekle\" kuralı buna dayanır.",
+              "<code>instanceof</code> arayüzle de çalışır: <code>d instanceof Controllable</code>. Örnek: 2025-26 vizesi S5'teki akıllı ev sorusu (<code>Device</code> soyut sınıfı + <code>Controllable</code> arayüzü). <code>ArrayList&lt;Device&gt;</code> içinde gezerken <code>Device</code> referansında <code>display()</code> görünmez; listede Controllable olmayan bir cihaz da olabileceği için önce <code>if (d instanceof Controllable)</code> ile kontrol edilir, sonra <code>((Controllable) d).display()</code> diye cast edilip çağrılır.",
               "Arayüz tipinde referans (<code>Kontrol k = t;</code>) üzerinden sadece arayüzün metotları çağrılabilir."
             ]
           },
